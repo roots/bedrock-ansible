@@ -33,6 +33,7 @@ project_templates:
 project_shared_children:
   - path: web/app/uploads
     src: uploads
+    mode: "0775"
 
 # The project_environment is a list of environment variables that can be used in hooks
 # Example:
