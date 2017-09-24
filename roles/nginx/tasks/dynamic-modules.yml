@@ -1,0 +1,39 @@
+---
+- name: Find Nginx version
+  shell: nginx -v 2>&1 | awk -F/ '{print $2}'
+  register: nginx_version_raw
+
+- name: Find Nginx configure options
+  shell: "nginx -V 2>&1 | awk -F: '$1==\"configure arguments\"{print $2;exit;}'"
+  register: nginx_configure_options_raw
+
+- name: Set Fact -- Nginx dynamic modules
+  set_fact:
+    nginx_source_path: "/opt/{{ nginx_package }}-{{ nginx_version_raw.stdout }}"
+    nginx_configure_options: "{{ nginx_configure_options_raw.stdout.split(' --')|reject('search','add-dynamic-module=')|list|join(' --') }}"
+
+- name: Install Nginx build dependencies
+  apt:
+    name: "{{ nginx_package }}"
+    state: build-dep
+    force: yes
+
+- name: Grab Nginx source
+  shell: "apt-get source {{ nginx_package }}"
+  args:
+    chdir: /opt
+
+- name: Configure dynamic modules
+  shell: "./configure {{ nginx_configure_options }} --add-dynamic-module=../{{ nginx_dynamic_modules.keys()|join(' --add-dynamic-module=../') }}"
+  args:
+    chdir: "{{ nginx_source_path }}"
+
+- name: Compile dynamic modules
+  shell: make modules
+  args:
+    chdir: "{{ nginx_source_path }}"
+
+- name:  Create 60-dynamic-modules.conf
+  template:
+    src: dynamic-modules.conf.j2
+    dest: "{{ nginx_path }}/modules-available/60-dynamic-modules.conf"

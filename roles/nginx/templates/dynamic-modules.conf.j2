@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{% for obj in ( nginx_dynamic_modules | json_query('*.objs') | sum(start = []) ) %}
+load_module {{ nginx_source_path }}/objs/{{ obj }};
+{% endfor %}

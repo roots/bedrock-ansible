@@ -16,3 +16,19 @@ nginx_cache_path: /var/cache/nginx
 nginx_cache_key_storage_size: 10m
 nginx_cache_size: 250m
 nginx_cache_inactive: 1h
+
+# Dynamic modules
+# Reserved for future Trellis. Don't change!
+nginx_dynamic_modules_default: {}
+
+# Exmaple:
+# nginx_dynamic_modules_custom:
+#   ngx_brotli:
+#     repo: "https://github.com/google/ngx_brotli.git"
+#     version: bfd2885b2da4d763fed18f49216bb935223cd34b
+#     objs:
+#       - ngx_http_brotli_filter_module.so
+#       - ngx_http_brotli_static_module.so
+nginx_dynamic_modules_custom: {}
+
+nginx_dynamic_modules: "{{ nginx_dynamic_modules_default | combine(nginx_dynamic_modules_custom) }}"
