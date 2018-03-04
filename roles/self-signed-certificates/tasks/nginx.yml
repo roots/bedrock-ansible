@@ -1,0 +1,16 @@
+---
+- name: Ensure SSL includes.d directories exist
+  file:
+    path: "{{ nginx_path }}/includes.d/{{ item.key }}/ssl"
+    state: directory
+    mode: 0755
+  when: site_uses_self_signed_certificates
+  with_dict: "{{ wordpress_sites }}"
+
+- name: Template Nginx SSL directives out to includes.d
+  template:
+    src: self-signed-certificates.conf.j2
+    dest: "{{ nginx_path }}/includes.d/{{ item.key }}/ssl/self-signed-certificates.conf"
+  when: site_uses_self_signed_certificates
+  with_dict: "{{ wordpress_sites }}"
+  notify: reload nginx

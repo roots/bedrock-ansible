@@ -1,0 +1,32 @@
+---
+- name: Ensure SSL directories exist
+  file:
+    path: "{{ nginx_ssl_path }}/self-signed-certificates"
+    state: directory
+    mode: 0700
+  when: site_uses_self_signed_certificates
+  with_dict: "{{ wordpress_sites }}"
+
+- name: Generate private keys
+  openssl_privatekey:
+    path: "{{ nginx_ssl_path }}/self-signed-certificates/{{ item.key | quote }}.key"
+  with_dict: "{{ wordpress_sites }}"
+  when: site_uses_self_signed_certificates
+
+- name: Generate certificate signing requests
+  openssl_csr:
+    path: "{{ nginx_ssl_path }}/self-signed-certificates/{{ item.key | quote }}.csr"
+    privatekey_path: "{{ nginx_ssl_path }}/self-signed-certificates/{{ item.key | quote }}.key"
+    common_name: "{{ item.value.site_hosts[0].canonical }}"
+    subject_alt_name: "{{ site_hosts | union(multisite_subdomains_wildcards) | map('regex_replace', '(.*)', 'DNS:\\1') | join(',') }}"
+  with_dict: "{{ wordpress_sites }}"
+  when: site_uses_self_signed_certificates
+
+- name: Generate self-signed certificates
+  openssl_certificate:
+    path: "{{ nginx_ssl_path }}/self-signed-certificates/{{ item.key | quote }}.cert"
+    privatekey_path: "{{ nginx_ssl_path }}/self-signed-certificates/{{ item.key | quote }}.key"
+    csr_path: "{{ nginx_ssl_path }}/self-signed-certificates/{{ item.key | quote }}.csr"
+    provider: selfsigned
+  with_dict: "{{ wordpress_sites }}"
+  when: site_uses_self_signed_certificates

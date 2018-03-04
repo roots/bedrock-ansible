@@ -34,9 +34,11 @@
     - { role: ssmtp, tags: [ssmtp, mail] }
     - { role: php, tags: [php] }
     - { role: memcached, tags: [memcached] }
-    - { role: nginx, tags: [nginx] }
+    - { role: nginx, tags: [nginx, wordpress, wordpress-setup] }
     - { role: logrotate, tags: [logrotate] }
     - { role: composer, tags: [composer] }
     - { role: wp-cli, tags: [wp-cli] }
-    - { role: letsencrypt, tags: [letsencrypt], when: sites_using_letsencrypt | count }
+    - { role: letsencrypt, tags: [wordpress, wordpress-setup, letsencrypt], when: sites_using_letsencrypt | count }
     - { role: wordpress-setup, tags: [wordpress, wordpress-setup, letsencrypt] }
+    - { role: manual-certificates, tags: [wordpress, wordpress-setup, letsencrypt] }
+    - { role: self-signed-certificates, tags: [wordpress, wordpress-setup, letsencrypt] }

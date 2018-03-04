@@ -1,8 +1,6 @@
 ---
 - import_tasks: database.yml
   tags: wordpress-setup-database
-- import_tasks: self-signed-certificate.yml
-  tags: wordpress-setup-self-signed-certificate
 - import_tasks: nginx-client-cert.yml
   tags: wordpress-setup-nginx-client-cert
 

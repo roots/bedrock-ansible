@@ -1,0 +1,12 @@
+---
+- name: Install python pip
+  apt:
+    name: python-pip
+    state: latest
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_valid_time }}"
+
+- name: Install pyOpenSSL
+  pip:
+    name: pyopenssl
+    state: latest

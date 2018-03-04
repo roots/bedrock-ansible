@@ -1,0 +1,2 @@
+sites_using_manual_certificates: "[{% for name, site in wordpress_sites.iteritems() if site.ssl.enabled and site.ssl.provider | default('manual') == 'manual' %}'{{ name }}',{% endfor %}]"
+site_uses_manual_certificates: ssl_enabled and item.value.ssl.provider | default('manual') == 'manual'

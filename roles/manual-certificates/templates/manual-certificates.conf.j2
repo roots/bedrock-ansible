@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+# Manual Certificates
+
+ssl_certificate     {{ nginx_ssl_path }}/manual-certificates/{{ item.value.ssl.cert | basename }};
+ssl_certificate_key {{ nginx_ssl_path }}/manual-certificates/{{ item.value.ssl.key | basename }};

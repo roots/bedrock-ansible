@@ -1,0 +1,2 @@
+sites_using_self_signed_certificates: "[{% for name, site in wordpress_sites.iteritems() if site.ssl.enabled and site.ssl.provider | default('manual') == 'self-signed' %}'{{ name }}',{% endfor %}]"
+site_uses_self_signed_certificates: ssl_enabled and item.value.ssl.provider | default('manual') == 'self-signed'

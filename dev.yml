@@ -15,9 +15,11 @@
     - { role: php, tags: [php] }
     - { role: xdebug, tags: [php, xdebug] }
     - { role: memcached, tags: [memcached] }
-    - { role: nginx, tags: [nginx] }
+    - { role: nginx, tags: [nginx, wordpress, wordpress-setup] }
     - { role: logrotate, tags: [logrotate] }
     - { role: composer, tags: [composer] }
     - { role: wp-cli, tags: [wp-cli] }
     - { role: wordpress-setup, tags: [wordpress, wordpress-setup] }
+    - { role: manual-certificates, tags: [wordpress, wordpress-setup] }
+    - { role: self-signed-certificates, tags: [wordpress, wordpress-setup] }
     - { role: wordpress-install, tags: [wordpress, wordpress-install] }

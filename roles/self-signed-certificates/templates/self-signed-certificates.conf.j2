@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+# Self-signed Certificates
+
+ssl_certificate         {{ nginx_ssl_path }}/self-signed-certificates/{{ item.key }}.cert;
+ssl_trusted_certificate {{ nginx_ssl_path }}/self-signed-certificates/{{ item.key }}.cert;
+ssl_certificate_key     {{ nginx_ssl_path }}/self-signed-certificates/{{ item.key }}.key;
