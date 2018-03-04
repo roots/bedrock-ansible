@@ -1,0 +1,24 @@
+---
+- name: Create databases for sites
+  mysql_db:
+    name: "{{ app_env.db_database }}"
+    state: present
+    login_host: "{{ app_env.db_host }}"
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'laravel' and app_uses_local_db and item.value.db_create | default(true)
+
+- name: Create/assign database user to db and grant permissions
+  mysql_user:
+    name: "{{ app_env.db_username }}"
+    password: "{{ app_env.db_password }}"
+    host: "{{ app_env.db_user_host|default('localhost') }}"
+    append_privs: yes
+    priv: "{{app_env.db_database}}.*:ALL"
+    state: present
+    login_host: "{{ app_env.db_host|default('localhost') }}"
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'laravel' and app_uses_local_db and item.value.db_create | default(true)

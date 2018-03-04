@@ -1,0 +1,16 @@
+---
+- import_tasks: database.yml
+  tags: app-setup-database
+
+- import_tasks: supervisor.yml
+  tags: app-setup-supervisor
+
+- name: Setup Laravel system cron
+  cron:
+    name: "{{ item.key }} Laravel Artisan scheduler"
+    minute: "*/1"
+    user: "{{ web_user }}"
+    job: "run-one php {{ www_root }}/{{ item.key }}/current/artisan schedule:run >> /dev/null 2>&1"
+    cron_file: "artisan-{{ item.key | replace('.', '_') }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'laravel'

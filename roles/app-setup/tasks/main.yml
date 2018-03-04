@@ -1,0 +1,50 @@
+- import_tasks: self-signed-certificate.yml
+  tags: app-setup-self-signed-certificate
+- import_tasks: nginx-client-cert.yml
+  tags: app-setup-nginx-client-cert
+
+- name: Create web root
+  file:
+    path: "{{ www_root }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: 0755
+    state: directory
+
+- name: Create logs folder of sites
+  file:
+    path: "{{ www_root }}/{{ item.key }}/logs"
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: 0755
+    state: directory
+  with_dict: "{{ apps }}"
+
+- name: Create app php-fpm configuration file
+  template:
+    src: php-fpm.conf.j2
+    dest: /etc/php/7.2/fpm/pool.d/app.conf
+  notify: reload php-fpm
+
+- name: Disable default PHP-FPM pool
+  command: mv /etc/php/7.2/fpm/pool.d/www.conf /etc/php/7.2/fpm/pool.d/www.disabled
+  args:
+    creates: /etc/php/7.2/fpm/pool.d/www.disabled
+  when: disable_default_pool | default(true)
+  notify: reload php-fpm
+
+- import_tasks: nginx-includes.yml
+  tags: [nginx-includes, app-setup-nginx]
+
+- import_tasks: nginx.yml
+  tags: app-setup-nginx
+
+- name: Import WordPress setup
+  import_role:
+    name: wordpress-setup
+  when: apps_using_wordpress | count
+
+- name: Import Laravel setup
+  import_role:
+    name: laravel-setup
+  when: apps_using_laravel | count

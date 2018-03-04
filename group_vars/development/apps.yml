@@ -1,0 +1,32 @@
+# Documentation: https://roots.io/trellis/docs/local-development-setup/
+# `apps` options: https://roots.io/trellis/docs/wordpress-sites
+# Define accompanying passwords/secrets in group_vars/development/vault.yml
+
+apps:
+
+  wordpress.com:
+    type: wordpress
+    site_hosts:
+      - canonical: wordpress.test
+        redirects:
+          - www.wordpress.test
+    local_path: ../wordpress # path targeting local Bedrock site directory (relative to Ansible root)
+    admin_email: admin@example.test
+    multisite:
+      enabled: false
+    ssl:
+      enabled: false
+      provider: self-signed
+    cache:
+      enabled: false
+
+  laravel.com:
+    type: laravel
+    site_hosts:
+      - canonical: laravel.test
+        redirects:
+          - www.laravel.test
+    local_path: ../laravel # path targeting local Laravel directory (relative to Ansible root)
+    ssl:
+      enabled: false
+      provider: self-signed

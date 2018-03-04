@@ -3,5 +3,5 @@
   file:
     path: "{{ nginx_path }}/sites-enabled/letsencrypt-{{ item }}.conf"
     state: absent
-  with_items: "{{ wordpress_sites.keys() }}"
+  with_items: "{{ apps.keys() }}"
   notify: reload nginx

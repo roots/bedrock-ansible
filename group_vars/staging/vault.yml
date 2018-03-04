@@ -7,10 +7,11 @@ vault_users:
     password: example_password
     salt: "generateme"
 
-# Variables to accompany `group_vars/staging/wordpress_sites.yml`
+# Variables to accompany `group_vars/staging/apps.yml`
 # Note: the site name (`example.com`) must match up with the site name in the above file.
-vault_wordpress_sites:
-  example.com:
+vault_apps:
+
+  wordpress.com:
     env:
       db_password: example_dbpassword
       # Generate your keys here: https://roots.io/salts.html
@@ -22,3 +23,7 @@ vault_wordpress_sites:
       secure_auth_salt: "generateme"
       logged_in_salt: "generateme"
       nonce_salt: "generateme"
+
+  laravel.com:
+    env:
+      db_password: example_dbpassword

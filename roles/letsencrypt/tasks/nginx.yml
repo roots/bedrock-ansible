@@ -10,8 +10,8 @@
     sed -n -e "/listen 80/,/server_name/{s/server_name \(.*\);/\1/p}" {{ nginx_path }}/sites-enabled/{{ item.key }}.conf
   register: current_hosts
   changed_when: false
-  when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  when: app_uses_letsencrypt
+  with_dict: "{{ apps }}"
 
 - name: Create needed Nginx confs for challenges
   template:
@@ -19,9 +19,9 @@
     dest: "{{ nginx_path }}/sites-available/letsencrypt-{{ item.key }}.conf"
   register: challenge_site_confs
   when:
-    - site_uses_letsencrypt
+    - app_uses_letsencrypt
     - missing_hosts | count
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
 
 - name: Enable Nginx sites
   file:
@@ -30,9 +30,9 @@
     state: link
   register: challenge_sites_enabled
   when:
-    - site_uses_letsencrypt
+    - app_uses_letsencrypt
     - missing_hosts | count
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
   notify: disable temporary challenge sites
 
 - import_tasks: "{{ playbook_dir }}/roles/common/tasks/reload_nginx.yml"
@@ -49,8 +49,8 @@
     hosts: "{{ site_hosts }}"
   register: letsencrypt_test_challenges
   ignore_errors: true
-  when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  when: app_uses_letsencrypt
+  with_dict: "{{ apps }}"
 
 - name: Notify of challenge failures
   fail:

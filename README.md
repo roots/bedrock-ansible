@@ -2,7 +2,7 @@
 [![Release](https://img.shields.io/github/release/roots/trellis.svg?style=flat-square)](https://github.com/roots/trellis/releases)
 [![Build Status](https://img.shields.io/travis/roots/trellis.svg?style=flat-square)](https://travis-ci.org/roots/trellis)
 
-Ansible playbooks for setting up a LEMP stack for WordPress.
+Ansible playbooks for setting up a LEMP stack for WordPress and/or Laravel.
 
 - Local development environment with Vagrant
 - High-performance production servers
@@ -20,7 +20,8 @@ Trellis will configure a server with the following and more:
 * Let's Encrypt integration for free SSL certificates
 * HTTP/2 support (requires SSL)
 * Composer
-* WP-CLI
+* WP-CLI (only if you're using WordPress)
+* Supervisor (only if you're using Laravel)
 * sSMTP (mail delivery)
 * MailHog
 * Memcached
@@ -45,10 +46,11 @@ The recommended directory structure for a Trellis project looks like:
 ```shell
 example.com/      # → Root folder for the project
 ├── trellis/      # → Your clone of this repository
-└── site/         # → A Bedrock-based WordPress site
+└── wordpress/    # → A Bedrock-based WordPress site
     └── web/
         ├── app/  # → WordPress content directory (themes, plugins, etc.)
         └── wp/   # → WordPress core (don't touch!)
+    laravel/      # → A Laravel app
 ```
 
 See a complete working example in the [roots-example-project.com repo](https://github.com/roots/roots-example-project.com).
@@ -61,7 +63,7 @@ Windows user? [Read the Windows docs](https://roots.io/trellis/docs/windows/) fo
 
 ## Local development setup
 
-1. Configure your WordPress sites in `group_vars/development/wordpress_sites.yml` and in `group_vars/development/vault.yml`
+1. Configure your WordPress sites and/or Laravel apps in `group_vars/development/apps.yml` and in `group_vars/development/vault.yml`
 2. Run `vagrant up`
 
 [Read the local development docs](https://roots.io/trellis/docs/local-development-setup/) for more information.
@@ -72,7 +74,7 @@ For remote servers, installing Ansible locally is an additional requirement. See
 
 A base Ubuntu 16.04 server is required for setting up remote servers. OS X users must have [passlib](http://pythonhosted.org/passlib/install.html#installation-instructions) installed.
 
-1. Configure your WordPress sites in `group_vars/<environment>/wordpress_sites.yml` and in `group_vars/<environment>/vault.yml` (see the [Vault docs](https://roots.io/trellis/docs/vault/) for how to encrypt files containing passwords)
+1. Configure your WordPress sites and/or Laravel apps in `group_vars/<environment>/apps.yml` and in `group_vars/<environment>/vault.yml` (see the [Vault docs](https://roots.io/trellis/docs/vault/) for how to encrypt files containing passwords)
 2. Add your server IP/hostnames to `hosts/<environment>`
 3. Specify public SSH keys for `users` in `group_vars/all/users.yml` (see the [SSH Keys docs](https://roots.io/trellis/docs/ssh-keys/))
 4. Run `ansible-playbook server.yml -e env=<environment>` to provision the server
@@ -81,7 +83,7 @@ A base Ubuntu 16.04 server is required for setting up remote servers. OS X users
 
 ## Deploying to remote servers
 
-1. Add the `repo` (Git URL) of your Bedrock WordPress project in the corresponding `group_vars/<environment>/wordpress_sites.yml` file
+1. Add the `repo` (Git URL) of your project to the corresponding `group_vars/<environment>/apps.yml` file
 2. Set the `branch` you want to deploy
 3. Run `./bin/deploy.sh <environment> <site name>`
 4. To rollback a deploy, run `ansible-playbook rollback.yml -e "site=<site name> env=<environment>"`

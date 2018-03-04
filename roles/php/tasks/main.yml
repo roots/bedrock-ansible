@@ -4,6 +4,11 @@
     repo: "ppa:ondrej/php"
     update_cache: yes
 
+- name: Add WordPress PHP extensions to the default list
+  set_fact:
+    php_extensions: "{{ php_extensions | combine(wordpress_php_extensions) }}"
+  when: apps_using_wordpress | count
+
 - name: Install PHP 7.2
   apt:
     name: "{{ item.key }}"
@@ -17,14 +22,14 @@
     state: started
     enabled: true
 
-- name: Check for existing php7.1-fpm service
+- name: Check for existing php7.2-fpm service
   stat:
-    path: /etc/init.d/php7.1-fpm
+    path: /etc/init.d/php7.2-fpm
   register: php71_status
 
-- name: Stop php7.1-fpm service if it exists
+- name: Stop php7.2-fpm service if it exists
   service:
-    name: php7.1-fpm
+    name: php7.2-fpm
     state: stopped
     enabled: false
   register: service_stopped

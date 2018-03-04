@@ -11,21 +11,21 @@
   roles:
     - { role: connection, tags: [connection, always] }
 
-- name: Deploy WP site
+- name: Deploy App
   hosts: web:&{{ env }}
   remote_user: "{{ web_user }}"
   pre_tasks:
     - name: Ensure site is valid
       connection: local
       fail:
-        msg: "Site `{{ site | default('') }}` is not valid. Available sites to deploy: {{ wordpress_sites.keys() | join(', ') }}"
-      when: wordpress_sites[site | default('')] is not defined
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites to deploy: {{ apps.keys() | join(', ') }}"
+      when: apps[site | default('')] is not defined
     - name: Ensure repo is valid
       connection: local
       fail:
         msg: |
           Invalid Git repository.
-          Ensure that your site's `repo` variable is defined in `group_vars/{{ env }}/wordpress_sites.yml` and uses the SSH format (example: git@github.com:roots/bedrock.git)
+          Ensure that your site's `repo` variable is defined in `group_vars/{{ env }}/apps.yml` and uses the SSH format (example: git@github.com:roots/bedrock.git)
           More info:
           > https://roots.io/trellis/docs/deploys/
       when: project.repo is not defined or not project.repo | match(".*@.*:.*\.git")

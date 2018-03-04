@@ -2,19 +2,19 @@ ntp_timezone: Etc/UTC
 
 env_groups: "{{ ['development', 'staging', 'production'] | intersect(group_names) }}"
 
-envs_with_wp_sites: "{{
+envs_with_apps: "{{
   lookup('filetree', playbook_dir + '/group_vars') |
-  selectattr('path', 'match', '(' + env_groups | join('|') + ')/wordpress_sites\\.yml$') |
+  selectattr('path', 'match', '(' + env_groups | join('|') + ')/apps\\.yml$') |
   map(attribute='path') | map('regex_replace', '([^/]*)/.*', '\\1') | list
 }}"
 
 site_keys_by_env_pair: "[
-  {% for env_pair in envs_with_wp_sites | combinations(2) | list %}
+  {% for env_pair in envs_with_apps | combinations(2) | list %}
     {
       'env_pair': {{ env_pair }},
       'site_keys': {{
-                     (vars[env_pair[0] + '_sites'].wordpress_sites | default({})).keys() | intersect(
-                     (vars[env_pair[1] + '_sites'].wordpress_sites | default({})).keys())
+                     (vars[env_pair[0] + '_sites'].apps | default({})).keys() | intersect(
+                     (vars[env_pair[1] + '_sites'].apps | default({})).keys())
                    }}
     },
   {% endfor %}
@@ -39,3 +39,5 @@ overlapping_kex: "[{% for kex in (sshd_kex_algorithms_default + sshd_kex_algorit
 overlapping_macs: "[{% for mac in (sshd_macs_default + sshd_macs_extra) if mac in ssh_client_macs %}'{{ mac }}',{% endfor %}]"
 host_key_types: "[{% for path in sshd_host_keys %}'{{ path | regex_replace('/etc/ssh/ssh_host_(.+)_key', '\\1') | regex_replace('dsa', 'ssh-dss')}}',{% endfor %}]"
 overlapping_host_keys: "{% for key in host_key_types if key in ssh_client_host_key_algorithms %}{{ key }},{% endfor %}"
+
+laravel_apps: "{ {% for apps in apps if app.type == 'laravel' -%}{{app}},{% endfor -%} }"

@@ -21,7 +21,7 @@
   args:
     chdir: "{{ nginx_path }}/ssl"
     creates: "{{ nginx_path }}/ssl/dhparams.pem"
-  when: wordpress_sites.values() | map(attribute='ssl') | selectattr('enabled') | list | count
+  when: apps.values() | map(attribute='ssl') | selectattr('enabled') | list | count
   notify: reload nginx
   tags: [diffie-hellman]
 

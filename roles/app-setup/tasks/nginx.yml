@@ -4,7 +4,7 @@
     src: "{{ item.value.ssl.cert }}"
     dest: "{{ nginx_ssl_path }}/{{ item.value.ssl.cert | basename }}"
     mode: 0640
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
   when: ssl_enabled and item.value.ssl.cert is defined
   notify: reload nginx
 
@@ -13,7 +13,7 @@
     src: "{{ item.value.ssl.key }}"
     dest: "{{ nginx_ssl_path }}/{{ item.value.ssl.key | basename }}"
     mode: 0600
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
   when: ssl_enabled and item.value.ssl.key is defined
   notify: reload nginx
 
@@ -25,20 +25,20 @@
     dest: "{{ nginx_path }}/acme-challenge-location.conf"
   notify: reload nginx
 
-- name: Create WordPress configuration for Nginx
+- name: Create app configuration for Nginx
   template:
-    src: "{{ item.value.nginx_wordpress_site_conf | default(nginx_wordpress_site_conf) }}"
+    src: "{{ item.value.nginx_app_conf | default(nginx_app_conf) }}"
     dest: "{{ nginx_path }}/sites-available/{{ item.key }}.conf"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
   notify: reload nginx
   tags: nginx-includes
 
-- name: Enable WordPress site
+- name: Enable app
   file:
     src: "{{ nginx_path }}/sites-available/{{ item.key }}.conf"
     dest: "{{ nginx_path }}/sites-enabled/{{ item.key }}.conf"
     owner: root
     group: root
     state: link
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
   notify: reload nginx

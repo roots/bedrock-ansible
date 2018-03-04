@@ -17,7 +17,7 @@
 
   vars:
     project_root: "{{ www_root }}/{{ site }}"
-    project_current_path: "{{ wordpress_sites[site].current_path | default('current') }}"
+    project_current_path: "{{ apps[site].current_path | default('current') }}"
 
   roles:
     - rollback

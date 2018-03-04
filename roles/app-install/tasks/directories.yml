@@ -1,21 +1,21 @@
 ---
-- name: Create web root of sites
+- name: Create current directory for app(s)
   file:
-    path: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/web"
+    path: "{{ www_root }}/{{ item.key }}/current"
     owner: "{{ web_user }}"
     group: "{{ web_group }}"
     mode: 0755
     state: directory
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
 
-- name: Create shared folder of sites
+- name: Create shared folder for app(s)
   file:
     path: "{{ www_root }}/{{ item.key }}/shared"
     owner: "{{ web_user }}"
     group: "{{ web_group }}"
     mode: 0755
     state: directory
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
 
 - name: Change site owner to user
   file:
@@ -24,4 +24,4 @@
     group: "{{ web_group }}"
     state: directory
     recurse: yes
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"

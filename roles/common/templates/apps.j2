@@ -1,0 +1,10 @@
+Invalid application configuration: site names in `apps` must have matching entry in `vault_apps`.
+
+Sites without a matching vault entry:
+{% for name in apps.keys() | difference(vault_apps.keys()) %}
+* `{{ name }}`
+{% endfor %}
+
+Update `group_vars/{{ env }}/vault.yml` to continue.
+
+Docs: https://roots.io/trellis/docs/wordpress-sites/#passwordssecrets

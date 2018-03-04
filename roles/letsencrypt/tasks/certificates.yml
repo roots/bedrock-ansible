@@ -3,15 +3,15 @@
   shell: openssl genrsa 4096 > {{ letsencrypt_keys_dir }}/{{ item.key }}.key
   args:
     creates: "{{ letsencrypt_keys_dir }}/{{ item.key }}.key"
-  when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  when: app_uses_letsencrypt
+  with_dict: "{{ apps }}"
 
 - name: Ensure correct permissions on private keys
   file:
     path: "{{ letsencrypt_keys_dir }}/{{ item.key }}.key"
     mode: 0600
-  when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  when: app_uses_letsencrypt
+  with_dict: "{{ apps }}"
 
 - name: Generate Lets Encrypt certificate IDs
   shell: |
@@ -20,8 +20,8 @@
     md5sum | cut -c -7
   register: generate_cert_ids
   changed_when: false
-  when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  when: app_uses_letsencrypt
+  with_dict: "{{ apps }}"
   tags: [wordpress, wordpress-setup, nginx-includes]
 
 - name: Generate CSRs
@@ -29,8 +29,8 @@
   args:
     executable: /bin/bash
     creates: "{{ acme_tiny_data_directory }}/csrs/{{ item.key }}-{{ letsencrypt_cert_ids[item.key] }}.csr"
-  when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  when: app_uses_letsencrypt
+  with_dict: "{{ apps }}"
 
 - name: Generate certificate renewal script
   template:

@@ -19,7 +19,7 @@
       register: python_check
       changed_when: not python_check.stdout | search('/usr/bin/python')
 
-- name: WordPress Server - Install LEMP Stack with PHP 7.2 and MariaDB MySQL
+- name: Application Server - Install LEMP Stack with PHP 7.2 and MariaDB MySQL
   hosts: web:&{{ env }}
   become: yes
   roles:
@@ -33,10 +33,11 @@
     - { role: mariadb, tags: [mariadb] }
     - { role: ssmtp, tags: [ssmtp, mail] }
     - { role: php, tags: [php] }
-    - { role: memcached, tags: [memcached] }
+    - { role: memcached, tags: [memcached], when: apps_using_memcached | count }
     - { role: nginx, tags: [nginx] }
     - { role: logrotate, tags: [logrotate] }
     - { role: composer, tags: [composer] }
-    - { role: wp-cli, tags: [wp-cli] }
-    - { role: letsencrypt, tags: [letsencrypt], when: sites_using_letsencrypt | count }
-    - { role: wordpress-setup, tags: [wordpress, wordpress-setup, letsencrypt] }
+    - { role: wp-cli, tags: [wp-cli], when: apps_using_wordpress | count}
+    - { role: supervisor, tags: [supervisor], when: apps_using_laravel | count }
+    - { role: letsencrypt, tags: [letsencrypt], when: apps_using_letsencrypt | count }
+    - { role: app-setup, tags: [app, app-setup, letsencrypt] }

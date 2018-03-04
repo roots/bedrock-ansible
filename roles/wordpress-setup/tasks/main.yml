@@ -1,46 +1,6 @@
 ---
 - import_tasks: database.yml
-  tags: wordpress-setup-database
-- import_tasks: self-signed-certificate.yml
-  tags: wordpress-setup-self-signed-certificate
-- import_tasks: nginx-client-cert.yml
-  tags: wordpress-setup-nginx-client-cert
-
-- name: Create web root
-  file:
-    path: "{{ www_root }}"
-    owner: "{{ web_user }}"
-    group: "{{ web_group }}"
-    mode: 0755
-    state: directory
-
-- name: Create logs folder of sites
-  file:
-    path: "{{ www_root }}/{{ item.key }}/logs"
-    owner: "{{ web_user }}"
-    group: "{{ web_group }}"
-    mode: 0755
-    state: directory
-  with_dict: "{{ wordpress_sites }}"
-
-- name: Create WordPress php-fpm configuration file
-  template:
-    src: php-fpm.conf.j2
-    dest: /etc/php/7.2/fpm/pool.d/wordpress.conf
-  notify: reload php-fpm
-
-- name: Disable default PHP-FPM pool
-  command: mv /etc/php/7.2/fpm/pool.d/www.conf /etc/php/7.2/fpm/pool.d/www.disabled
-  args:
-    creates: /etc/php/7.2/fpm/pool.d/www.disabled
-  when: disable_default_pool | default(true)
-  notify: reload php-fpm
-
-- import_tasks: nginx-includes.yml
-  tags: [nginx-includes, wordpress-setup-nginx]
-
-- import_tasks: nginx.yml
-  tags: wordpress-setup-nginx
+  tags: app-setup-database
 
 - name: Setup WP system cron
   cron:
@@ -50,7 +10,8 @@
     job: "cd {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }} && wp cron event run --due-now > /dev/null 2>&1"
     cron_file: "wordpress-{{ item.key | replace('.', '_') }}"
     state: "{{ (cron_enabled and not item.value.multisite.enabled) | ternary('present', 'absent') }}"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'wordpress'
 
 - name: Setup WP Multisite system cron
   cron:
@@ -60,4 +21,5 @@
     job: "cd {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }} && wp site list --field=url | xargs -n1 -I \\% wp --url=\\% cron event run --due-now > /dev/null 2>&1"
     cron_file: "wordpress-multisite-{{ item.key | replace('.', '_') }}"
     state: "{{ (cron_enabled and item.value.multisite.enabled) | ternary('present', 'absent') }}"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'wordpress'

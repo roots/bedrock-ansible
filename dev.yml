@@ -1,5 +1,5 @@
 ---
-- name: "WordPress Server: Install LEMP Stack with PHP 7.2 and MariaDB MySQL"
+- name: "App Server: Install LEMP Stack with PHP 7.2 and MariaDB MySQL"
   hosts: web:&development
   become: yes
   remote_user: vagrant
@@ -14,10 +14,11 @@
     - { role: mailhog, tags: [mailhog, mail] }
     - { role: php, tags: [php] }
     - { role: xdebug, tags: [php, xdebug] }
-    - { role: memcached, tags: [memcached] }
+    - { role: memcached, tags: [memcached], when: apps_using_memcached | count }
     - { role: nginx, tags: [nginx] }
     - { role: logrotate, tags: [logrotate] }
     - { role: composer, tags: [composer] }
-    - { role: wp-cli, tags: [wp-cli] }
-    - { role: wordpress-setup, tags: [wordpress, wordpress-setup] }
-    - { role: wordpress-install, tags: [wordpress, wordpress-install] }
+    - { role: wp-cli, tags: [wp-cli], when: apps_using_wordpress | count }
+    - { role: supervisor, tags: [supervisor], when: apps_using_laravel | count }
+    - { role: app-setup, tags: [app, app-setup] }
+    - { role: app-install, tags: [app, app-install] }

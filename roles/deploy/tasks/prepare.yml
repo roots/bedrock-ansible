@@ -18,7 +18,7 @@
 
 - name: Fail if repo_subtree_path is set incorrectly
   fail:
-    msg: "repo subtree is set to '{{ project.repo_subtree_path }}' but that path does not exist in the repo. Edit `repo_subtree_path` for '{{ site }}' in `wordpress_sites.yml`."
+    msg: "repo subtree is set to '{{ project.repo_subtree_path }}' but that path does not exist in the repo. Edit `repo_subtree_path` for '{{ site }}' in `apps.yml`."
   when: project.repo_subtree_path is defined and not project_subtree_full_path.stat.exists
 
 - name: Create new release dir

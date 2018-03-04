@@ -18,6 +18,6 @@ EOF\n
     executable: "/bin/bash"
     chdir: "{{ nginx_ssl_path }}"
     creates: "{{ item.key }}.*"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ apps }}"
   when: ssl_enabled and item.value.ssl.provider | default('manual') == 'self-signed'
   notify: reload nginx

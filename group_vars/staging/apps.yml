@@ -1,0 +1,36 @@
+# Documentation: https://roots.io/trellis/docs/remote-server-setup/
+# `apps` options: https://roots.io/trellis/docs/wordpress-sites
+# Define accompanying passwords/secrets in group_vars/staging/vault.yml
+
+apps:
+
+  wordpress.com:
+    type: wordpress
+    site_hosts:
+      - canonical: staging.example.com
+        # redirects:
+        #   - otherdomain.com
+    local_path: ../wordpress # path targeting local Bedrock site directory (relative to Ansible root)
+    repo: git@github.com:example/example.com.git # replace with your Git repo URL
+    repo_subtree_path: wordpress # relative path to your Bedrock/WP directory in your repo
+    branch: master
+    multisite:
+      enabled: false
+    ssl:
+      enabled: false
+      provider: letsencrypt
+    cache:
+      enabled: false
+
+  laravel.com:
+    type: laravel
+    site_hosts:
+      - canonical: staging.laravel.com
+        # redirects:
+          # - otherdomain.com
+    local_path: ../laravel # path targeting local Laravel directory (relative to Ansible root)
+    repo: git@github.com:example/example.com.git # replace with your Git repo URL
+    repo_subtree_path: laravel # relative path to your Laravel directory in your repo
+    ssl:
+      enabled: false
+      provider: self-signed

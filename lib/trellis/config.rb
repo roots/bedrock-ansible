@@ -11,7 +11,7 @@ module Trellis
 
     def multisite_subdomains?
       @using_multisite_subdomains ||= begin
-        wordpress_sites.any? do |(_name, site)|
+        apps.any? do |(_name, site)|
           next false unless multisite = site['multisite']
           multisite.fetch('enabled', false) && multisite.fetch('subdomains', false)
         end
@@ -28,16 +28,16 @@ module Trellis
 
     def site_hosts
       @site_hosts ||= begin
-        wordpress_sites.flat_map { |(_name, site)| site['site_hosts'] }.tap do |hosts|
+        apps.flat_map { |(_name, site)| site['site_hosts'] }.tap do |hosts|
           fail_with message: template_content if malformed?(site_hosts: hosts)
         end
       end
     end
 
-    def wordpress_sites
-      @wordpress_sites ||= begin
-        content['wordpress_sites'].tap do |sites|
-          fail_with message: "No sites found in #{path}." if sites.to_h.empty?
+    def apps
+      @apps ||= begin
+        content['apps'].tap do |sites|
+          fail_with message: "No apps found in #{path}." if sites.to_h.empty?
         end
       end
     end
@@ -62,7 +62,7 @@ module Trellis
     end
 
     def path
-      File.join(@root_path, 'group_vars', 'development', 'wordpress_sites.yml')
+      File.join(@root_path, 'group_vars', 'development', 'apps.yml')
     end
 
     def template_content

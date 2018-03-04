@@ -1,0 +1,14 @@
+---
+- name: Run the migrations
+  command: "/usr/bin/php artisan migrate --force chdir={{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'laravel'
+  register: migrations_result
+  changed_when: migrations_result.stdout != 'Nothing to migrate.'
+
+- name: Generate app key
+  command: "/usr/bin/php artisan key:generate chdir={{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}"
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'laravel'
+
+

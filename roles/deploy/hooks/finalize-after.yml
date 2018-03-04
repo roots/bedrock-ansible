@@ -31,9 +31,21 @@
       chdir: "{{ deploy_helper.current_path }}"
     when: project.update_db_on_deploy | default(update_db_on_deploy)
 
-  when: wp_installed.rc == 0
+  when: project.type == 'wordpress' and wp_installed and wp_installed.rc|default(0) == 0
 
 - name: Reload php-fpm
   shell: sudo service php7.2-fpm reload
   args:
     warn: false
+
+- block:
+  - name: Update queue workers
+    shell: sudo supervisorctl reread && sudo supervisorctl update
+    args:
+      chdir: "{{ deploy_helper.new_release_path }}"
+      warn: false
+
+  - name: Restart all queue workers
+    command: /usr/bin/php artisan queue:restart chdir={{ deploy_helper.new_release_path }}
+
+  when: project.type == 'laravel'

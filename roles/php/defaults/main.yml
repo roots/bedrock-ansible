@@ -12,8 +12,10 @@ php_extensions_default:
   php7.2-mysql: "{{ apt_package_state }}"
   php7.2-opcache: "{{ apt_package_state }}"
   php7.2-xml: "{{ apt_package_state }}"
-  php7.2-xmlrpc: "{{ apt_package_state }}"
   php7.2-zip: "{{ apt_package_state }}"
+
+wordpress_php_extensions:
+  php7.2-xmlrpc: "{{ apt_package_state }}"
 
 php_extensions_custom: {}
 php_extensions: "{{ php_extensions_default | combine(php_extensions_custom) }}"

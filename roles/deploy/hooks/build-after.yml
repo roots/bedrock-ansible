@@ -6,7 +6,7 @@
 
 - name: Fail if composer.json not found
   fail:
-    msg: "Unable to find a `composer.json` file in the root of '{{ deploy_helper.new_release_path }}'. Make sure your repo has a `composer.json` file in its root or edit `repo_subtree_path` for '{{ site }}' in `wordpress_sites.yml` so it points to the directory with a `composer.json` file."
+    msg: "Unable to find a `composer.json` file in the root of '{{ deploy_helper.new_release_path }}'. Make sure your repo has a `composer.json` file in its root or edit `repo_subtree_path` for '{{ site }}' in `apps.yml` so it points to the directory with a `composer.json` file."
   when: not composer_json.stat.exists
 
 - name: Setup packagist.com authentication

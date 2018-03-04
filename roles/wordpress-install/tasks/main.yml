@@ -1,64 +1,21 @@
 ---
-- import_tasks: directories.yml
-  tags: wordpress-install-directories
-
-- name: Create .env file
-  template:
-    src: "env.j2"
-    dest: "/tmp/{{ item.key }}.env"
-    owner: "{{ web_user }}"
-    group: "{{ web_group }}"
-  with_dict: "{{ wordpress_sites }}"
-
-- name: Copy .env file into web root
-  command: rsync -ac --info=NAME /tmp/{{ item.key }}.env {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/.env
-  with_dict: "{{ wordpress_sites }}"
-  register: env_file
-  changed_when: env_file.stdout == item.key + '.env'
-
-- name: Add known_hosts
-  known_hosts:
-    name: "{{ item.name }}"
-    key: "{{ item.key | default(omit) }}"
-    path: "{{ item.path | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
-  become: no
-  with_items: "{{ known_hosts | default([]) }}"
-
-- name: Setup packagist.com authentication
-  composer:
-    command: config
-    arguments: --auth http-basic.repo.packagist.com token {{ item.value.packagist_token }}
-    working_dir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
-  no_log: true
-  when: item.value.packagist_token is defined
-  with_dict: "{{ wordpress_sites }}"
-
-- name: Install Dependencies with Composer
-  composer:
-    no_dev: no
-    optimize_autoloader: no
-    working_dir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
-  become: no
-  with_dict: "{{ wordpress_sites }}"
-
 - name: Install WP
   command: wp core {{ item.value.multisite.enabled | default(false) | ternary('multisite-install', 'install') }}
            --allow-root
-           --url="{{ site_env.wp_home }}"
+           --url="{{ app_env.wp_home }}"
            {% if item.value.multisite.enabled | default(false) %}
            --base="{{ item.value.multisite.base_path | default('/') }}"
            --subdomains="{{ item.value.multisite.subdomains | default('false') }}"
            {% endif %}
            --title="{{ item.value.site_title | default(item.key) }}"
            --admin_user="{{ item.value.admin_user | default('admin') }}"
-           --admin_password="{{ vault_wordpress_sites[item.key].admin_password }}"
+           --admin_password="{{ vault_apps[item.key].admin_password }}"
            --admin_email="{{ item.value.admin_email }}"
   args:
     chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
   register: wp_install
-  with_dict: "{{ wordpress_sites }}"
-  when: item.value.site_install | default(true)
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'wordpress' and item.value.site_install | default(true)
   changed_when: "'WordPress is already installed.' not in wp_install.stdout and 'The network already exists.' not in wp_install.stdout"
 
 - name: Setup Permalink Structure
@@ -69,8 +26,8 @@
   when: item | changed
 
 - name: Update WP Multisite Home URL
-  command: wp option update home {{ site_env.wp_home }} --allow-root
+  command: wp option update home {{ app_env.wp_home }} --allow-root
   args:
     chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
-  with_dict: "{{ wordpress_sites }}"
-  when: item.value.site_install | default(true) and item.value.multisite.enabled | default(false)
+  with_dict: "{{ apps }}"
+  when: item.value.type == 'wordpress' and item.value.site_install | default(true) and item.value.multisite.enabled | default(false)

@@ -1,19 +1,47 @@
 wordpress_env_defaults:
+  wp_env: "{{ env }}"
   db_host: localhost
   db_name: "{{ item.key | underscore }}_{{ env }}"
   db_user: "{{ item.key | underscore }}"
   db_user_host: localhost
   disable_wp_cron: true
-  wp_env: "{{ env }}"
   wp_home: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}"
   wp_siteurl: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}/wp"
   domain_current_site: "{{ site_hosts_canonical | first }}"
+wordpress_env: "{{ wordpress_env_defaults | combine(item.value.env | default({}), vault_apps[item.key].env) }}"
 
-site_env: "{{ wordpress_env_defaults | combine(item.value.env | default({}), vault_wordpress_sites[item.key].env) }}"
+laravel_env_defaults:
+  app_env: "{{ env }}"
+  app_name: Example
+  app_key: "" # this is set by artisan
+  app_debug: false
+  app_url: http://example.test
+  log_channel: stack
+  db_connection: mysql
+  db_host: localhost
+  db_port: 3306
+  db_database: "{{ item.key | underscore }}_{{ env }}"
+  db_username: "{{ item.key | underscore }}"
+  broadcast_driver: log
+  cache_driver: file
+  session_driver: file
+  session_lifetime: 120
+  queue_driver: sync
+  mail_driver: smtp
+  mail_host: 127.0.0.1
+  mail_port: 1025
+  mail_user: testuser
+  mail_password: testpwd
+  mail_encryption: "null"
+laravel_env: "{{ laravel_env_defaults | combine(item.value.env | default({}), vault_apps[item.key].env) }}"
+
+app_env: "{% if item.value.type == 'wordpress' -%}{{ wordpress_env }}{% elif item.value.type == 'laravel' -%}{{ laravel_env }}{% endif -%}"
+
+app_uses_local_db: "{{ app_env.db_host == 'localhost' }}"
 site_hosts_canonical: "{{ item.value.site_hosts | map(attribute='canonical') | list }}"
 site_hosts_redirects: "{{ item.value.site_hosts | selectattr('redirects', 'defined') | sum(attribute='redirects', start=[]) | list }}"
 site_hosts: "{{ site_hosts_canonical | union(site_hosts_redirects) }}"
-multisite_subdomains_wildcards: "{{ item.value.multisite.subdomains | default(false) | ternary( site_hosts_canonical | map('regex_replace', '^(www\\.)?(.*)$', '*.\\2') | list, [] ) }}"
+multisite_subdomains_wildcards: "{{ item.value.multisite|default([]) and item.value.multisite.subdomains|default([]) | default(false) | ternary( site_hosts_canonical | map('regex_replace', '^(www\\.)?(.*)$', '*.\\2') | list, [] ) }}"
 ssl_enabled: "{{ item.value.ssl is defined and item.value.ssl.enabled | default(false) }}"
 ssl_stapling_enabled: "{{ item.value.ssl is defined and item.value.ssl.stapling_enabled | default(true) }}"
-cron_enabled: "{{ site_env.disable_wp_cron and (not item.value.multisite.enabled | default(false) or (item.value.multisite.enabled | default(false) and item.value.multisite.cron | default(true))) }}"
+cron_enabled: "{{ app_env.disable_wp_cron and (not item.value.multisite.enabled | default(false) or (item.value.multisite.enabled | default(false) and item.value.multisite.cron | default(true))) }}"

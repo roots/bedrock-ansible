@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+[program:{{ item.key }}-laravel-worker]
+process_name=%(process_num)02d
+command=php {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/artisan queue:work --queue=default --tries=2
+autostart=true
+autorestart=true
+user={{ web_user }}
+numprocs=2
+redirect_stderr=true
+stdout_logfile={{ www_root }}/{{ item.key }}/logs/worker.log

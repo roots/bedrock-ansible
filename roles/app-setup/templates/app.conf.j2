@@ -15,7 +15,11 @@ server {
   {% endblock %}
 
   {% block server_basic -%}
+  {% if item.value.type == 'wordpress' -%}
   root  {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/web;
+  {% elif item.value.type == 'laravel' -%}
+  root  {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/public;
+  {% endif -%}
   index index.php index.htm index.html;
   add_header Fastcgi-Cache $upstream_cache_status;
 
@@ -49,10 +53,11 @@ server {
   {% endif -%}
   {% endblock -%}
 
-  {% block multisite_rewrites -%}
-  {% if item.value.multisite.enabled | default(false) -%}
+  {% block wordpress_multisite_rewrites -%}
+  {% if item.value.type == 'wordpress' | default(false) -%}
+  {% if item.value.multisite is defined and item.value.multisite.enabled | default(false) -%}
   # Multisite rewrites
-  {% if item.value.multisite.subdomains | default(false) -%}
+  {% if item.value.multisite and item.value.multisite.subdomains and item.value.multisite.subdomains | default(false) -%}
   rewrite ^/(wp-.*.php)$ /wp/$1 last;
   rewrite ^/(wp-(content|admin|includes).*) /wp/$1 last;
 
@@ -63,6 +68,7 @@ server {
     rewrite ^(/[^/]+)?(/.*\.php) /wp$2 last;
   }
 
+  {% endif -%}
   {% endif -%}
   {% endif -%}
   {% endblock -%}
@@ -112,11 +118,13 @@ server {
 
   {% endblock -%}
 
-  {% block location_uploads_php -%}
+  {% block wordpress_location_uploads_php -%}
+  {% if item.value.type == 'wordpress' %}
   # Prevent PHP scripts from being executed inside the uploads folder.
   location ~* /app/uploads/.*\.php$ {
     deny all;
   }
+  {% endif -%}
   {% endblock %}
 
   {% block location_primary -%}
@@ -182,7 +190,7 @@ server {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
     fastcgi_param DOCUMENT_ROOT $realpath_root;
-    fastcgi_pass unix:/var/run/php-fpm-wordpress.sock;
+    fastcgi_pass unix:/var/run/php-fpm-app.sock;
     {%- endblock %}
 
   }

@@ -1,5 +1,4 @@
-site_uses_local_db: "{{ site_env.db_host == 'localhost' }}"
-nginx_wordpress_site_conf: wordpress-site.conf.j2
+nginx_app_conf: app.conf.j2
 nginx_ssl_path: "{{ nginx_path }}/ssl"
 
 # HSTS defaults
@@ -19,7 +18,7 @@ nginx_skip_cache_cookie: comment_author|wordpress_[a-f0-9]+|wp-postpass|wordpres
 
 # Nginx includes
 nginx_includes_templates_path: nginx-includes
-nginx_includes_deprecated: roles/wordpress-setup/templates/includes.d
+nginx_includes_deprecated: roles/app-setup/templates/includes.d
 nginx_includes_pattern: "^({{ nginx_includes_templates_path | regex_escape }}|{{ nginx_includes_deprecated | regex_escape }})/(.*)\\.j2$"
 nginx_includes_d_cleanup: true
 

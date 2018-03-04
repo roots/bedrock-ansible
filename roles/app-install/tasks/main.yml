@@ -1,0 +1,52 @@
+- import_tasks: directories.yml
+  tags: app-install-directories
+
+- name: Create .env file
+  template:
+    src: "env.j2"
+    dest: "/tmp/{{ item.key }}.env"
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+  with_dict: "{{ apps }}"
+
+- name: Copy .env file into web root
+  command: rsync -ac --info=NAME /tmp/{{ item.key }}.env {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/.env
+  with_dict: "{{ apps }}"
+  register: env_file
+  changed_when: env_file.stdout == item.key + '.env'
+
+- name: Add known_hosts
+  known_hosts:
+    name: "{{ item.name }}"
+    key: "{{ item.key | default(omit) }}"
+    path: "{{ item.path | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  become: no
+  with_items: "{{ known_hosts | default([]) }}"
+
+- name: Setup packagist.com authentication
+  composer:
+    command: config
+    arguments: --auth http-basic.repo.packagist.com token {{ item.value.packagist_token }}
+    working_dir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  no_log: true
+  with_dict: "{{ apps }}"
+  when: item.value.packagist_token is defined
+
+- name: Install Dependencies with Composer
+  composer:
+    no_dev: no
+    optimize_autoloader: no
+    working_dir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  become: no
+  with_dict: "{{ apps }}"
+
+- name: Import WordPress install
+  import_role:
+    name: wordpress-install
+  when: apps_using_wordpress | count
+
+- name: Import Laravel install
+  import_role:
+    name: laravel-install
+  when: apps_using_laravel | count
