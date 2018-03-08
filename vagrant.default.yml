@@ -1,5 +1,5 @@
 ---
-vagrant_ip: '192.168.50.5'
+vagrant_ip: 'dhcp'
 vagrant_cpus: 1
 vagrant_memory: 1024 # in MB
 vagrant_box: 'bento/ubuntu-16.04'
