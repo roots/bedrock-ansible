@@ -26,6 +26,7 @@ _apt_packages_default:
   dbus: "{{ apt_package_state }}"
   git: "{{ apt_package_state }}"
   libnss-myhostname: "{{ apt_package_state }}"
+  mysql-client: "{{ apt_package_state }}"
 
 apt_packages_python:
   '2':

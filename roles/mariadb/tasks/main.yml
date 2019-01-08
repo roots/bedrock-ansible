@@ -1,71 +1,61 @@
 ---
-- block:
-  - name: Add MariaDB APT key
-    apt_key:
-      keyserver: "{{ mariadb_keyserver }}"
-      id: "{{ mariadb_keyserver_id }}"
+- name: Add MariaDB APT key
+  apt_key:
+    keyserver: "{{ mariadb_keyserver }}"
+    id: "{{ mariadb_keyserver_id }}"
 
-  - name: Add MariaDB PPA
-    apt_repository:
-      repo: "{{ mariadb_ppa }}"
-      update_cache: yes
+- name: Add MariaDB PPA
+  apt_repository:
+    repo: "{{ mariadb_ppa }}"
+    update_cache: yes
 
-- name: Install MySQL client
+- name: Install MySQL server
   apt:
-    name: "{{ mariadb_client_package }}"
-    state: "{{ mariadb_client_package_state | default(apt_package_state) }}"
+    name: "{{ mariadb_server_package }}"
+    state: "{{ mariadb_server_package_state | default(apt_package_state) }}"
     cache_valid_time: "{{ apt_cache_valid_time }}"
 
-- block:
-  - name: Install MySQL server
-    apt:
-      name: "{{ mariadb_server_package }}"
-      state: "{{ mariadb_server_package_state | default(apt_package_state) }}"
-      cache_valid_time: "{{ apt_cache_valid_time }}"
+- name: Disable MariaDB binary logging
+  template:
+    src: disable-binary-logging.cnf
+    dest: /etc/mysql/conf.d
+    owner: root
+    group: root
+  when: mysql_binary_logging_disabled
+  notify: restart mysql server
 
-  - name: Disable MariaDB binary logging
-    template:
-      src: disable-binary-logging.cnf
-      dest: /etc/mysql/conf.d
-      owner: root
-      group: root
-    when: mysql_binary_logging_disabled
-    notify: restart mysql server
+- name: Set root user password
+  mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ mysql_root_password }}"
+    check_implicit_admin: yes
+    state: present
+  with_items:
+    - "{{ inventory_hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
 
-  - name: Set root user password
-    mysql_user:
-      name: root
-      host: "{{ item }}"
-      password: "{{ mysql_root_password }}"
-      check_implicit_admin: yes
-      state: present
-    with_items:
-      - "{{ inventory_hostname }}"
-      - 127.0.0.1
-      - ::1
-      - localhost
+- name: Copy .my.cnf file with root password credentials.
+  template:
+    src: my.cnf.j2
+    dest: ~/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
 
-  - name: Copy .my.cnf file with root password credentials.
-    template:
-      src: my.cnf.j2
-      dest: ~/.my.cnf
-      owner: root
-      group: root
-      mode: 0600
+- name: Delete anonymous MySQL server users
+  mysql_user:
+    user: ""
+    host: "{{ item }}"
+    state: absent
+  with_items:
+    - localhost
+    - "{{ inventory_hostname }}"
+    - "{{ ansible_hostname }}"
 
-  - name: Delete anonymous MySQL server users
-    mysql_user:
-      user: ""
-      host: "{{ item }}"
-      state: absent
-    with_items:
-      - localhost
-      - "{{ inventory_hostname }}"
-      - "{{ ansible_hostname }}"
-
-  - name: Remove the test database
-    mysql_db:
-      name: test
-      state: absent
-
-  when: not sites_using_remote_db | count
+- name: Remove the test database
+  mysql_db:
+    name: test
+    state: absent

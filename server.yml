@@ -27,7 +27,7 @@
     - { role: ntp, tags: [ntp] }
     - { role: users, tags: [users] }
     - { role: sshd, tags: [sshd] }
-    - { role: mariadb, tags: [mariadb] }
+    - { role: mariadb, tags: [mariadb],  when: not sites_using_remote_db | count }
     - { role: ssmtp, tags: [ssmtp, mail] }
     - { role: php, tags: [php] }
     - { role: memcached, tags: [memcached] }
