@@ -1,7 +1,7 @@
 ; {{ ansible_managed }}
 
-[wordpress]
-listen = /var/run/php-fpm-wordpress.sock
+[app]
+listen = /var/run/php-fpm-app.sock
 listen.owner = www-data
 listen.group = www-data
 user = {{ web_user }}

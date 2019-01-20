@@ -185,7 +185,7 @@ server {
     {% block cache_config -%}
     {% if item.value.cache is defined and item.value.cache.enabled | default(false) -%}
     # Fastcgi cache settings
-    fastcgi_cache wordpress;
+    fastcgi_cache app;
     fastcgi_cache_valid {{ item.value.cache.duration | default(nginx_cache_duration) }};
     fastcgi_cache_bypass $skip_cache;
     fastcgi_no_cache $skip_cache;
@@ -198,7 +198,7 @@ server {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
     fastcgi_param DOCUMENT_ROOT $realpath_root;
-    fastcgi_pass unix:/var/run/php-fpm-wordpress.sock;
+    fastcgi_pass unix:/var/run/php-fpm-app.sock;
     {%- endblock %}
 
   }

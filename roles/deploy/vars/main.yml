@@ -1,4 +1,4 @@
-wordpress_env_defaults:
+app_env_defaults:
   db_host: localhost
   db_name: "{{ site | underscore }}_{{ env }}"
   db_user: "{{ site | underscore }}"
@@ -8,4 +8,4 @@ wordpress_env_defaults:
   wp_siteurl: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}/wp"
   domain_current_site: "{{ project.site_hosts | map(attribute='canonical') | first }}"
 
-site_env: "{{ wordpress_env_defaults | combine(vault_wordpress_env_defaults | default({}), project.env | default({}), vault_wordpress_sites[site].env) }}"
+site_env: "{{ app_env_defaults | combine(vault_app_env_defaults | default({}), project.env | default({}), vault_sites[site].env) }}"

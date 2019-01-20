@@ -1,16 +1,16 @@
 ---
 - block:
-  - name: Load wordpress_sites.yml vars into <env>_sites vars
+  - name: Load sites.yml vars into <env>_sites vars
     include_vars:
-      file: group_vars/{{ item }}/wordpress_sites.yml
+      file: group_vars/{{ item }}/sites.yml
       name: "{{ item }}_sites"
     with_items: "{{ envs_with_wp_sites }}"
     when: envs_with_wp_sites | count > 1
 
-  - name: Fail if there are duplicate site keys within host's wordpress_sites
+  - name: Fail if there are duplicate site keys within host's sites
     fail:
       msg: >
-        If you put multiple environments on `{{ inventory_hostname }}`, `wordpress_sites`
+        If you put multiple environments on `{{ inventory_hostname }}`, `sites`
         must use different site keys per environment. Adjust the following site keys that
         are duplicated between the `{{ item.env_pair | join('` and `') }}` groups:
           {{ item.site_keys | to_nice_yaml | indent(2) }}
@@ -21,18 +21,18 @@
     - env_groups | count > 1
     - validate_site_keys | default(true) | bool
 
-- name: Validate wordpress_sites
+- name: Validate sites
   fail:
-    msg: "{{ lookup('template', 'wordpress_sites.j2') }}"
-  when: wordpress_sites.keys() | difference(vault_wordpress_sites.keys()) | count
-  tags: [wordpress]
+    msg: "{{ lookup('template', 'sites.j2') }}"
+  when: sites.keys() | difference(vault_sites.keys()) | count
+  tags: [app]
 
 - name: Validate format of site_hosts
   fail:
     msg: "{{ lookup('template', 'site_hosts.j2') }}"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
   when: item.value.site_hosts | rejectattr('canonical', 'defined') | list | count
-  tags: [letsencrypt, wordpress]
+  tags: [letsencrypt, app]
 
 - name: Verify dict format for apt package component variables
   fail:

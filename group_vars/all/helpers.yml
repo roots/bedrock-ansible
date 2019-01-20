@@ -1,4 +1,4 @@
-wordpress_env_defaults:
+app_env_defaults:
   db_host: localhost
   db_name: "{{ item.key | underscore }}_{{ env }}"
   db_user: "{{ item.key | underscore }}"
@@ -9,7 +9,7 @@ wordpress_env_defaults:
   wp_siteurl: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}/wp"
   domain_current_site: "{{ site_hosts_canonical | first }}"
 
-site_env: "{{ wordpress_env_defaults | combine(vault_wordpress_env_defaults | default({}), item.value.env | default({}), vault_wordpress_sites[item.key].env) }}"
+site_env: "{{ app_env_defaults | combine(vault_app_env_defaults | default({}), item.value.env | default({}), vault_sites[item.key].env) }}"
 site_hosts_canonical: "{{ item.value.site_hosts | map(attribute='canonical') | list }}"
 site_hosts_redirects: "{{ item.value.site_hosts | selectattr('redirects', 'defined') | sum(attribute='redirects', start=[]) | list }}"
 site_hosts: "{{ site_hosts_canonical | union(site_hosts_redirects) }}"
@@ -17,4 +17,4 @@ multisite_subdomains_wildcards: "{{ item.value.multisite.subdomains | default(fa
 ssl_enabled: "{{ item.value.ssl is defined and item.value.ssl.enabled | default(false) }}"
 ssl_stapling_enabled: "{{ item.value.ssl is defined and item.value.ssl.stapling_enabled | default(true) }}"
 cron_enabled: "{{ site_env.disable_wp_cron and (not item.value.multisite.enabled | default(false) or (item.value.multisite.enabled | default(false) and item.value.multisite.cron | default(true))) }}"
-sites_use_ssl: "{{ wordpress_sites.values() | map(attribute='ssl') | selectattr('enabled') | list | count > 0 }}"
+sites_use_ssl: "{{ sites.values() | map(attribute='ssl') | selectattr('enabled') | list | count > 0 }}"

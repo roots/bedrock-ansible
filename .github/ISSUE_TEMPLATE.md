@@ -42,7 +42,7 @@ Vagrant version: X
 
 X
 
-**Please provide a repository or your `wordpress_sites` config (if possible):**
+**Please provide a repository or your `sites` config (if possible):**
 
 X
 

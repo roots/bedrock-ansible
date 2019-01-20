@@ -70,7 +70,7 @@ Windows user? [Read the Windows docs](https://roots.io/trellis/docs/windows/) fo
 
 ## Local development setup
 
-1. Configure your WordPress sites in `group_vars/development/wordpress_sites.yml` and in `group_vars/development/vault.yml`
+1. Configure your WordPress sites in `group_vars/development/sites.yml` and in `group_vars/development/vault.yml`
 2. Ensure you're in the trellis directory: `cd trellis`
 3. Run `vagrant up`
 
@@ -82,7 +82,7 @@ For remote servers, installing Ansible locally is an additional requirement. See
 
 A base Ubuntu 18.04 (Bionic) server is required for setting up remote servers. OS X users must have [passlib](http://pythonhosted.org/passlib/install.html#installation-instructions) installed.
 
-1. Configure your WordPress sites in `group_vars/<environment>/wordpress_sites.yml` and in `group_vars/<environment>/vault.yml` (see the [Vault docs](https://roots.io/trellis/docs/vault/) for how to encrypt files containing passwords)
+1. Configure your WordPress sites in `group_vars/<environment>/sites.yml` and in `group_vars/<environment>/vault.yml` (see the [Vault docs](https://roots.io/trellis/docs/vault/) for how to encrypt files containing passwords)
 2. Add your server IP/hostnames to `hosts/<environment>`
 3. Specify public SSH keys for `users` in `group_vars/all/users.yml` (see the [SSH Keys docs](https://roots.io/trellis/docs/ssh-keys/))
 4. Run `ansible-playbook server.yml -e env=<environment>` to provision the server
@@ -91,7 +91,7 @@ A base Ubuntu 18.04 (Bionic) server is required for setting up remote servers. O
 
 ## Deploying to remote servers
 
-1. Add the `repo` (Git URL) of your Bedrock WordPress project in the corresponding `group_vars/<environment>/wordpress_sites.yml` file
+1. Add the `repo` (Git URL) of your Bedrock WordPress project in the corresponding `group_vars/<environment>/sites.yml` file
 2. Set the `branch` you want to deploy
 3. Run `./bin/deploy.sh <environment> <site name>`
 4. To rollback a deploy, run `ansible-playbook rollback.yml -e "site=<site name> env=<environment>"`

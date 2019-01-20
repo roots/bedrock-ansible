@@ -1,2 +1,2 @@
 project_root: "{{ www_root }}/{{ site }}"
-project_current_path: "{{ wordpress_sites[site].current_path | default('current') }}"
+project_current_path: "{{ sites[site].current_path | default('current') }}"

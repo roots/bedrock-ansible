@@ -18,14 +18,14 @@
     - name: Ensure site is valid
       delegate_to: localhost
       fail:
-        msg: "Site `{{ site | default('') }}` is not valid. Available sites to deploy: {{ wordpress_sites.keys() | join(', ') }}"
-      when: wordpress_sites[site | default('')] is not defined
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites to deploy: {{ sites.keys() | join(', ') }}"
+      when: sites[site | default('')] is not defined
     - name: Ensure repo is valid
       delegate_to: localhost
       fail:
         msg: |
           Invalid Git repository.
-          Ensure that your site's `repo` variable is defined in `group_vars/{{ env }}/wordpress_sites.yml` and uses the SSH format (example: git@github.com:roots/bedrock.git)
+          Ensure that your site's `repo` variable is defined in `group_vars/{{ env }}/sites.yml` and uses the SSH format (example: git@github.com:roots/bedrock.git)
           More info:
           > https://roots.io/trellis/docs/deploys/
       when: project.repo is not defined or project.repo is not match("^ssh://.+@.+|.+@.+:.+")

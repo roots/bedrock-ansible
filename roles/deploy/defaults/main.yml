@@ -49,7 +49,7 @@ project_current_path: "{{ project.current_path | default('current') }}"
 update_db_on_deploy: true
 
 # Helpers
-project: "{{ wordpress_sites[site] }}"
+project: "{{ sites[site] }}"
 project_root: "{{ www_root }}/{{ site }}"
 project_local_path: "{{ (lookup('env', 'USER') == 'vagrant') | ternary(project_root + '/' + project_current_path, project.local_path) }}"
 

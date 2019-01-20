@@ -11,7 +11,7 @@
   register: current_hosts
   changed_when: false
   when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
 - name: Create needed Nginx confs for challenges
   template:
@@ -21,7 +21,7 @@
   when:
     - site_uses_letsencrypt
     - missing_hosts | count
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
 - name: Enable Nginx sites
   file:
@@ -32,7 +32,7 @@
   when:
     - site_uses_letsencrypt
     - missing_hosts | count
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
   notify: disable temporary challenge sites
 
 - import_tasks: "{{ playbook_dir }}/roles/common/tasks/reload_nginx.yml"
@@ -50,7 +50,7 @@
   register: letsencrypt_test_challenges
   ignore_errors: true
   when: site_uses_letsencrypt
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
 - name: Notify of challenge failures
   fail:

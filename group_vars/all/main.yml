@@ -13,12 +13,12 @@ ip_whitelist:
 
 # Values of raw_vars will be wrapped in `{% raw %}` to avoid templating problems if values include `{%` and `{{`.
 # Will recurse dicts/lists. `*` is wildcard for one or more dict keys, list indices, or strings. Example:
-#   - vault_wordpress_sites.*.*_salt    -- matches vault_wordpress_sites.example.com.env.secure_auth_salt etc.
+#   - vault_sites.*.*_salt    -- matches vault_sites.example.com.env.secure_auth_salt etc.
 # Will not function for var names or topmost dict keys that contain a period ('.').
 raw_vars:
   - vault_mail_password
   - vault_mysql_root_password
   - vault_users.*.password
   - vault_users.*.salt
-  - vault_wordpress_env_defaults
-  - vault_wordpress_sites
+  - vault_app_env_defaults
+  - vault_sites

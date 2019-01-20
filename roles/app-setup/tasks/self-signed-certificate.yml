@@ -18,7 +18,7 @@ EOF\n
     executable: "/bin/bash"
     chdir: "{{ nginx_ssl_path }}"
     creates: "{{ item.key }}.*"
-  with_dict: "{{ wordpress_sites | combine(ssl_default_site) }}"
+  with_dict: "{{ sites | combine(ssl_default_site) }}"
   when:
     - sites_use_ssl
     - ssl_enabled

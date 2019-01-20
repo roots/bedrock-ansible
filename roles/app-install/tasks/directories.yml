@@ -6,7 +6,7 @@
     group: "{{ web_group }}"
     mode: 0755
     state: directory
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
 - name: Create shared folder of sites
   file:
@@ -15,7 +15,7 @@
     group: "{{ web_group }}"
     mode: 0755
     state: directory
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
 - name: Change site owner to user
   file:
@@ -24,4 +24,4 @@
     group: "{{ web_group }}"
     state: directory
     recurse: yes
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"

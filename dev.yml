@@ -6,7 +6,7 @@
   roles:
     - { role: python_interpreter, tags: [always] }
 
-- name: "WordPress Server: Install LEMP Stack with PHP 7.3 and MariaDB MySQL"
+- name: "Install LEMP Stack with PHP 7.3 and MariaDB MySQL"
   hosts: web:&development
   become: yes
   remote_user: vagrant
@@ -26,5 +26,5 @@
     - { role: logrotate, tags: [logrotate] }
     - { role: composer, tags: [composer] }
     - { role: wp-cli, tags: [wp-cli] }
-    - { role: wordpress-setup, tags: [wordpress, wordpress-setup] }
-    - { role: wordpress-install, tags: [wordpress, wordpress-install] }
+    - { role: app-setup, tags: [app, app-setup] }
+    - { role: app-install, tags: [app, app-install] }

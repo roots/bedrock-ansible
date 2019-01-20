@@ -1,7 +1,7 @@
 # Documentation: https://roots.io/trellis/docs/troubleshooting/#composer-install-host-key-verification-failed
 
 # Host keys to add to known_hosts, e.g.,
-#   - git host for Bedrock-based project (`repo` variable in `wordpress_sites`)
+#   - git host for Bedrock-based project (`repo` variable in `sites`)
 #   - git hosts in Bedrock project's composer.json
 known_hosts:
   - name: github.com
@@ -13,6 +13,6 @@ known_hosts:
   - name: gitlab.com
     key: gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9
 
-# Whether to automatically accept the host key for your `repo` (in `wordpress_sites`) during git clone.
+# Whether to automatically accept the host key for your `repo` (in `sites`) during git clone.
 # To avoid man-in-the-middle attacks, set this to `false` and add repo host key to `known_hosts` above.
 repo_accept_hostkey: true

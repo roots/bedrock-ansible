@@ -1,10 +1,10 @@
 ---
 - import_tasks: database.yml
-  tags: wordpress-setup-database
+  tags: app-setup-database
 - import_tasks: self-signed-certificate.yml
-  tags: wordpress-setup-self-signed-certificate
+  tags: app-setup-self-signed-certificate
 - import_tasks: nginx-client-cert.yml
-  tags: wordpress-setup-nginx-client-cert
+  tags: app-setup-nginx-client-cert
 
 - name: Create web root
   file:
@@ -21,12 +21,12 @@
     group: "{{ web_group }}"
     mode: 0755
     state: directory
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
-- name: Create WordPress php-fpm configuration file
+- name: Create site php-fpm configuration file
   template:
     src: php-fpm.conf.j2
-    dest: /etc/php/7.3/fpm/pool.d/wordpress.conf
+    dest: /etc/php/7.3/fpm/pool.d/site.conf
   notify: reload php-fpm
 
 - name: Disable default PHP-FPM pool
@@ -37,10 +37,10 @@
   notify: reload php-fpm
 
 - import_tasks: nginx-includes.yml
-  tags: [nginx-includes, wordpress-setup-nginx]
+  tags: [nginx-includes, app-setup-nginx]
 
 - import_tasks: nginx.yml
-  tags: wordpress-setup-nginx
+  tags: app-setup-nginx
 
 - name: Setup WP system cron
   cron:
@@ -50,7 +50,7 @@
     job: "cd {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }} && wp cron event run --due-now > /dev/null 2>&1"
     cron_file: "wordpress-{{ item.key | replace('.', '_') }}"
     state: "{{ (cron_enabled and not item.value.multisite.enabled) | ternary('present', 'absent') }}"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
 
 - name: Setup WP Multisite system cron
   cron:
@@ -60,4 +60,4 @@
     job: "cd {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }} && wp site list --field=url | xargs -n1 -I \\% wp --url=\\% cron event run --due-now > /dev/null 2>&1"
     cron_file: "wordpress-multisite-{{ item.key | replace('.', '_') }}"
     state: "{{ (cron_enabled and item.value.multisite.enabled) | ternary('present', 'absent') }}"
-  with_dict: "{{ wordpress_sites }}"
+  with_dict: "{{ sites }}"
