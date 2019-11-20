@@ -25,13 +25,11 @@
   become: no
   with_items: "{{ known_hosts | default([]) }}"
 
-- name: Setup packagist.com authentication
-  composer:
-    command: config
-    arguments: --auth http-basic.repo.packagist.com token {{ item.value.packagist_token }}
+- include_tasks: tasks/composer-authentications.yml
+  vars:
+    site: "{{ item.key }}"
     working_dir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
   no_log: true
-  when: item.value.packagist_token is defined
   with_dict: "{{ sites }}"
 
 - name: Install Dependencies with Composer
@@ -42,37 +40,8 @@
   become: no
   with_dict: "{{ sites }}"
 
-- name: Install WP
-  command: wp core {{ item.value.multisite.enabled | default(false) | ternary('multisite-install', 'install') }}
-           --allow-root
-           --url="{{ site_env.wp_home }}"
-           {% if item.value.multisite.enabled | default(false) %}
-           --base="{{ item.value.multisite.base_path | default('/') }}"
-           {% if item.value.multisite.subdomains | default('false') %}
-           --subdomains
-           {% endif %}
-           {% endif %}
-           --title="{{ item.value.site_title | default(item.key) }}"
-           --admin_user="{{ item.value.admin_user | default('admin') }}"
-           --admin_password="{{ vault_sites[item.key].admin_password }}"
-           --admin_email="{{ item.value.admin_email }}"
-  args:
-    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
-  register: wp_install
-  with_dict: "{{ sites }}"
-  when: item.value.site_install | default(true)
-  changed_when: "'WordPress is already installed.' not in wp_install.stdout and 'The network already exists.' not in wp_install.stdout"
+- import_tasks: install-wordpress.yml
+  tags: app-install-wordpress
 
-- name: Setup Permalink Structure
-  command: wp rewrite structure {{ item.item.value.initial_permalink_structure | default("/%postname%/") }} --allow-root
-  args:
-    chdir: "{{ www_root }}/{{ item.item.key }}/{{ item.item.value.current_path | default('current') }}/"
-  with_items: "{{ wp_install.results }}"
-  when: item is changed
-
-- name: Update WP Multisite Home URL
-  command: wp option update home {{ site_env.wp_home }} --allow-root
-  args:
-    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
-  with_dict: "{{ sites }}"
-  when: item.value.site_install | default(true) and item.value.multisite.enabled | default(false)
+- import_tasks: install-laravel.yml
+  tags: app-install-laravel

@@ -1,0 +1,51 @@
+---
+- block:
+  - name: Artisan cache routes
+    command: php artisan route:cache
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+
+  - name: Artisan cache config
+    command: php artisan config:cache
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+
+  - name: Run the database migrations
+    command: php artisan migrate
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+    when: project.migrate_db_on_deploy | default(migrate_db_on_deploy)
+
+  - name: Link the storage directory
+    command: php artisan storage:link
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+
+- name: Reload php-fpm
+  shell: sudo service php7.3-fpm reload
+  args:
+    warn: false
+
+- block:
+#  - name: Reread supervisor queue workers
+#    become: true
+#    become_user: "{{ admin_user }}"
+#    shell: supervisorctl reread
+#    args:
+#      chdir: "{{ deploy_helper.current_path }}"
+#      warn: false
+#
+#  - name: Update supervisor queue workers
+#    become: true
+#    become_user: "{{ admin_user }}"
+#    shell: supervisorctl update
+#    args:
+#      chdir: "{{ deploy_helper.current_path }}"
+#      warn: false
+
+  - name: Restart all queue workers
+    command: php artisan queue:restart
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+
+  tags: app-restart-queue

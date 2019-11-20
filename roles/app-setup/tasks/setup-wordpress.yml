@@ -1,0 +1,24 @@
+---
+- name: Setup WP system cron
+  cron:
+    name: "{{ item.key }} WordPress cron"
+    minute: "*/15"
+    user: "{{ web_user }}"
+    job: "cd {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }} && wp cron event run --due-now > /dev/null 2>&1"
+    cron_file: "wordpress-{{ item.key | replace('.', '_') }}"
+    state: "{{ (cron_enabled and not item.value.multisite.enabled) | ternary('present', 'absent') }}"
+
+  with_dict: "{{ sites }}"
+  when: (item.value.type | default('wordpress')) == 'wordpress'
+
+- name: Setup WP Multisite system cron
+  cron:
+    name: "{{ item.key }} WordPress network cron"
+    minute: "*/30"
+    user: "{{ web_user }}"
+    job: "cd {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }} && wp site list --field=url | xargs -n1 -I \\% wp --url=\\% cron event run --due-now > /dev/null 2>&1"
+    cron_file: "wordpress-multisite-{{ item.key | replace('.', '_') }}"
+    state: "{{ (cron_enabled and item.value.multisite.enabled) | ternary('present', 'absent') }}"
+
+  with_dict: "{{ sites }}"
+  when: (item.value.type | default('wordpress')) == 'wordpress'

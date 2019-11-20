@@ -1,20 +1,68 @@
-app_env_defaults:
-  db_host: localhost
-  db_name: "{{ item.key | underscore }}_{{ env }}"
-  db_user: "{{ item.key | underscore }}"
-  db_user_host: localhost
-  disable_wp_cron: true
-  wp_env: "{{ env }}"
-  wp_home: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}"
-  wp_siteurl: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}/wp"
-  domain_current_site: "{{ site_hosts_canonical | first }}"
+site_type: "{{ item.value.type | default('wordpress') }}"
+apps_env_defaults:
+  wordpress:
+    db_host: localhost
+    db_name: "{{ item.key | underscore }}_{{ env }}"
+    db_user: "{{ item.key | underscore }}"
+    db_user_host: localhost
+    disable_wp_cron: true
+    wp_env: "{{ env }}"
+    wp_home: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}"
+    wp_siteurl: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}/wp"
+    domain_current_site: "{{ site_hosts_canonical | first }}"
+  laravel:
+    app_name: "{{ item.key }}"
+    app_env: "{{ env }}"
+    mix_app_env: "{{ env }}"
+    app_key: ""
+    app_debug: true
+    app_url: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}"
+    mix_app_url: "{{ ssl_enabled | ternary('https', 'http') }}://{{ site_hosts_canonical | first }}"
+    log_channel: stack
+    db_connection: mysql
+    db_host: localhost
+    db_port: 3306
+    db_database: "{{ item.key | underscore }}_{{ env }}"
+    db_username: "{{ item.key | underscore }}"
+    broadcast_driver: log
+    cache_driver: file
+    queueu_connection: sync
+    session_driver: file
+    session_lifetime: 120
+    redis_host: 127.0.0.1
+    redis_password: "{{ vault_redis_password }}"
+    redis_port: 6379
+    mail_driver: smtp
+    mail_host: smtp.mailtrap.io
+    mail_port: 2525
+    mail_user: null
+    mail_password: null
+    mail_encryption: null
+    # aws_access_key_id:
+    # aws_secret_access_key:
+    # aws_deault_region: us-east-1
+    # aws_bucket:
+    # pusher_app_id:
+    # pusher_app_key:
+    # pusher_app_secret:
+    # pusher_app_cluster: mt1
+    # mix_pusher_app_key:"${PUSHER_APP_KEY}"
+    # mix_pusher_app_cluster:"${PUSHER_APP_CLUSTER}"
+
+app_env_defaults: "{{ apps_env_defaults[ site_type ] | default({}) }}"
 
 site_env: "{{ app_env_defaults | combine(vault_app_env_defaults | default({}), item.value.env | default({}), vault_sites[item.key].env) }}"
 site_hosts_canonical: "{{ item.value.site_hosts | map(attribute='canonical') | list }}"
 site_hosts_redirects: "{{ item.value.site_hosts | selectattr('redirects', 'defined') | sum(attribute='redirects', start=[]) | list }}"
 site_hosts: "{{ site_hosts_canonical | union(site_hosts_redirects) }}"
-multisite_subdomains_wildcards: "{{ item.value.multisite.subdomains | default(false) | ternary( site_hosts_canonical | map('regex_replace', '^(www\\.)?(.*)$', '*.\\2') | list, [] ) }}"
+multisite_subdomains_wildcards: "{{ ((site_type == 'wordpress') and item.value.multisite.subdomains) | default(false) | ternary( site_hosts_canonical | map('regex_replace', '^(www\\.)?(.*)$', '*.\\2') | list, [] ) }}"
 ssl_enabled: "{{ item.value.ssl is defined and item.value.ssl.enabled | default(false) }}"
 ssl_stapling_enabled: "{{ item.value.ssl is defined and item.value.ssl.stapling_enabled | default(true) }}"
 cron_enabled: "{{ site_env.disable_wp_cron and (not item.value.multisite.enabled | default(false) or (item.value.multisite.enabled | default(false) and item.value.multisite.cron | default(true))) }}"
 sites_use_ssl: "{{ sites.values() | map(attribute='ssl') | selectattr('enabled') | list | count > 0 }}"
+
+# For backward compatibility, to be removed in Trellis v2.
+site_packagist_org_authentications:
+  - { hostname: repo.packagist.com, username: token, password: "{{ vault_sites[site].packagist_token | default('') }}" }
+site_composer_authentications: "{{ vault_sites[site].composer_authentications | default([]) }}"
+composer_authentications: "{{ site_packagist_org_authentications + site_composer_authentications }}"

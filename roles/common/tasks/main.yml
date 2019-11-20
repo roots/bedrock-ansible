@@ -23,7 +23,7 @@
 
 - name: Validate sites
   fail:
-    msg: "{{ lookup('template', 'sites.j2') }}"
+    msg: "{{ lookup('template', 'site.j2') }}"
   when: sites.keys() | difference(vault_sites.keys()) | count
   tags: [app]
 
@@ -110,6 +110,10 @@
   when: openssh_6_8_plus and validate_ssh | default(true)
   tags: [sshd]
 
+- name: Update apt packages
+  apt:
+    update_cache: yes
+
 - name: Checking essentials
   apt:
     name: "{{ item.key }}"
@@ -144,8 +148,12 @@
   when: env == 'development'
 
 - name: Retrieve SSH client IP
-  ipify_facts:
-  delegate_to: localhost
-  become: no
-  when: env != 'development' and ssh_client_ip_lookup | default(true)
-  tags: [fail2ban, ferm]
+  block:
+    - ipify_facts:
+      delegate_to: localhost
+      become: no
+      when: env != 'development' and ssh_client_ip_lookup | default(true)
+      tags: [fail2ban, ferm]
+  rescue:
+    - fail:
+        msg: "External IP resolution failed. Check that your DNS servers are working. Try to disable DNSCrypt if you are using it."

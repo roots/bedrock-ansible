@@ -1,0 +1,18 @@
+# Placeholder `deploy_after_before` hook for building  assets on the remote server
+#
+# Uncomment the lines below
+#
+# ---
+#- block:
+#  - name: Install npm dependencies
+#    shell: "bash -c 'source $HOME/.nvm/nvm.sh && yarn'"
+#    args:
+#      chdir: "{{ deploy_helper.new_release_path }}"
+#
+#  - name: Compile assets for production
+#    shell: "bash -c 'source $HOME/.nvm/nvm.sh && yarn run production'"
+#    args:
+#      chdir: "{{ deploy_helper.new_release_path }}"
+#
+#  become: true
+#  become_user: "{{ web_user }}"

@@ -15,7 +15,7 @@ server {
   {% endblock %}
 
   {% block server_basic -%}
-  root  {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/web;
+  root  {{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/{{ item.value.web_root | default( (site_type == 'laravel') | ternary('public', 'web') ) }};
   index index.php index.htm index.html;
   add_header Fastcgi-Cache $upstream_cache_status;
 
@@ -50,6 +50,7 @@ server {
   {% endblock -%}
 
   {% block multisite_rewrites -%}
+  {% if site_type == 'wordpress' -%}
   {% if item.value.multisite.enabled | default(false) -%}
   # Multisite rewrites
   {% if item.value.multisite.subdomains | default(false) -%}
@@ -65,6 +66,7 @@ server {
 
   {% endif -%}
   {% endif -%}
+  {% endif -%}
   {% endblock -%}
 
   {% block https -%}
@@ -78,7 +80,9 @@ server {
   ssl_dhparam /etc/nginx/ssl/dhparams.pem;
   ssl_buffer_size 1400; # 1400 bytes to fit in one MTU
 
+  {% if item.value.ssl.provider | default('manual') != 'self-signed' -%}
   add_header Strict-Transport-Security "max-age={{ [hsts_max_age, hsts_include_subdomains, hsts_preload] | reject('none') | join('; ') }}";
+  {% endif -%}
 
   {% if item.value.ssl.client_cert_url is defined -%}
   ssl_verify_client       on;
@@ -115,7 +119,50 @@ server {
 
   {% block location_uploads_php -%}
   # Prevent PHP scripts from being executed inside the uploads folder.
+  {% if site_type == 'wordpress' -%}
   location ~* /app/uploads/.*\.php$ {
+    deny all;
+  }
+  {% elif site_type == 'laravel' -%}
+  location ~* /storage/.*\.php$ {
+    deny all;
+  }
+  {% endif -%}
+  {% endblock %}
+
+  {% block blade_twig_templates -%}
+  # Prevent Blade and Twig templates from being accessed directly.
+  location ~* \.(blade\.php|twig)$ {
+    deny all;
+  }
+  {% endblock %}
+
+  {% block dependency_managers -%}
+  # composer
+  location ~* composer\.(json|lock)$ {
+    deny all;
+  }
+
+  location ~* auth\.json$ {
+    deny all;
+  }
+
+  # npm
+  location ~* package(-lock)?\.json$ {
+    deny all;
+  }
+
+  # yarn
+  location ~* yarn\.lock$ {
+    deny all;
+  }
+
+  # bundler
+  location ~* Gemfile(\.lock)?$ {
+    deny all;
+  }
+
+  location ~* gems\.(rb|locked)?$ {
     deny all;
   }
   {% endblock %}
@@ -165,12 +212,14 @@ server {
   {% if item.value.nginx_embed_security | default(nginx_embed_security | default(true)) -%}
   add_header Content-Security-Policy "frame-ancestors 'self'" always;
 
+  {% if site_type == 'wordpress' -%}
   # Conditional X-Frame-Options until https://core.trac.wordpress.org/ticket/40020 is resolved
   set $x_frame_options SAMEORIGIN;
   if ($arg_customize_changeset_uuid) {
     set $x_frame_options "";
   }
   add_header X-Frame-Options $x_frame_options always;
+  {% endif -%}
 
   {% endif -%}
   {% endblock -%}

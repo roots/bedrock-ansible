@@ -1,11 +1,54 @@
-app_env_defaults:
-  db_host: localhost
-  db_name: "{{ site | underscore }}_{{ env }}"
-  db_user: "{{ site | underscore }}"
-  disable_wp_cron: true
-  wp_env: "{{ env }}"
-  wp_home: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}"
-  wp_siteurl: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}/wp"
-  domain_current_site: "{{ project.site_hosts | map(attribute='canonical') | first }}"
+site_type: "{{ project.type | default('wordpress') }}"
+
+apps_env_defaults:
+  wordpress:
+    db_host: localhost
+    db_name: "{{ site | underscore }}_{{ env }}"
+    db_user: "{{ site | underscore }}"
+    disable_wp_cron: true
+    wp_env: "{{ env }}"
+    wp_home: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}"
+    wp_siteurl: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}/wp"
+    domain_current_site: "{{ project.site_hosts | map(attribute='canonical') | first }}"
+  laravel:
+    app_name: "{{ site }}"
+    app_env: "{{ env }}"
+    mix_app_env: "{{ env }}"
+    app_key: ""
+    app_debug: true
+    app_url: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}"
+    mix_app_url: "{{ project.ssl.enabled | default(false) | ternary('https', 'http') }}://{{ project.site_hosts | map(attribute='canonical') | first }}"
+    log_channel: stack
+    db_connection: mysql
+    db_host: localhost
+    db_port: 3306
+    db_database: "{{ site | underscore }}_{{ env }}"
+    db_username: "{{ site | underscore }}"
+    broadcast_driver: log
+    cache_driver: file
+    queueu_connection: sync
+    session_driver: file
+    session_lifetime: 120
+    redis_host: 127.0.0.1
+    redis_password: "{{ vault_redis_password }}"
+    redis_port: 6379
+    mail_driver: smtp
+    mail_host: smtp.mailtrap.io
+    mail_port: 2525
+    mail_user: null
+    mail_password: null
+    mail_encryption: null
+    # aws_access_key_id:
+    # aws_secret_access_key:
+    # aws_deault_region: us-east-1
+    # aws_bucket:
+    # pusher_app_id:
+    # pusher_app_key:
+    # pusher_app_secret:
+    # pusher_app_cluster: mt1
+    # mix_pusher_app_key:"${PUSHER_APP_KEY}"
+    # mix_pusher_app_cluster:"${PUSHER_APP_CLUSTER}"
+
+app_env_defaults: "{{ env_defaults[ site_type ] | default({}) }}"
 
 site_env: "{{ app_env_defaults | combine(vault_app_env_defaults | default({}), project.env | default({}), vault_sites[site].env) }}"

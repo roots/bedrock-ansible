@@ -1,5 +1,6 @@
 # Documentation: https://roots.io/trellis/docs/vault/
 vault_mysql_root_password: stagingpw
+vault_redis_password: stagingpw
 
 # Documentation: https://roots.io/trellis/docs/security/
 vault_users:

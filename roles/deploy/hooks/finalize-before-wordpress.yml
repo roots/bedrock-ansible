@@ -1,0 +1,32 @@
+---
+- name: Create file with multisite constants defined as false
+  copy:
+    src: "tmp_multisite_constants.php"
+    dest: "{{ deploy_helper.shared_path }}/tmp_multisite_constants.php"
+
+- name: WordPress Installed?
+  command: wp core is-installed --skip-plugins --skip-themes --require={{ deploy_helper.shared_path }}/tmp_multisite_constants.php
+  args:
+    chdir: "{{ deploy_helper.new_release_path }}"
+  register: wp_installed
+  changed_when: false
+  failed_when: wp_installed.stderr | default("") != "" or wp_installed.rc > 1
+
+- name: Get WP theme template and stylesheet roots
+  shell: >
+    {% if not project.multisite.enabled | default(false) %}
+      wp option get {{ item }} --skip-plugins --skip-themes
+    {% else %}
+      wp site list --field=url | xargs -I {} bash -c 'export url="{}"; echo -n "$url " && wp option get {{ item }} --skip-plugins --skip-themes --url=$url || echo'
+    {% endif %}
+  args:
+    chdir: "{{ deploy_helper.current_path }}"
+  register: wp_template_root
+  changed_when: false
+  failed_when: wp_template_root.stderr | default('') is not match("(|.*Could not get '" + item + "' option\. Does it exist\?)")
+  when:
+    - wp_installed.rc == 0
+    - project.update_wp_theme_paths | default(update_wp_theme_paths | default(true)) | bool
+  with_items:
+    - template_root
+    - stylesheet_root

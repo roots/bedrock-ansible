@@ -1,3 +1,31 @@
+### Head
+* wordpress-setup: Block dependency manager files by Nginx ([#1116](https://github.com/roots/trellis/pull/1116))
+
+### 1.2.0: October 11th, 2019
+* Lets Encrypt ACME v2 support ([#1114](https://github.com/roots/trellis/pull/1114))
+* Fix self-signed certificates in Ansible 2.8 ([#1110](https://github.com/roots/trellis/pull/1110))
+* Update WP CLI to v2.3.0 ([#1109](https://github.com/roots/trellis/pull/1109))
+* Ansible 2.8.x support ([#1103](https://github.com/roots/trellis/pull/1103))
+* Bump galaxy dependency versions ([#1105](https://github.com/roots/trellis/pull/1105))
+* Fix issues with Vagrant ansible_local provisioner ([#1104](https://github.com/roots/trellis/pull/1104))
+* Bump ansible requirement to 2.7.12([#1102](https://github.com/roots/trellis/pull/1102))
+
+### 1.1.0: September 1st, 2019
+* Update swapfile role to v2.0.22 ([#1101](https://github.com/roots/trellis/pull/1101))
+* Add pip `requirements.txt` and rename `requirements.yml` to `galaxy.yml` ([#1100](https://github.com/roots/trellis/pull/1100))
+* Update apt packages before checking essentials task ([#1086](https://github.com/roots/trellis/pull/1086))
+* Setup composer HTTP basic authentication for multiple repositories ([#1091](https://github.com/roots/trellis/pull/1091))
+
+### 1.0.3: April 30th, 2019
+* Prevent direct access for `.blade.php` files ([#1075](https://github.com/roots/trellis/pull/1075))
+* Show custom error message if external IP resolution fails ([#1078](https://github.com/roots/trellis/pull/1078))
+* Use all canonical site hosts for Landrush TLD ([#1077](https://github.com/roots/trellis/pull/1077))
+
+### 1.0.2: March 13th, 2019
+* Improve handling of vars with `AnsibleUnsafe` ([#1071](https://github.com/roots/trellis/pull/1071))
+* Update name of Nginx PPA (`development` to `mainline`) ([#1068](https://github.com/roots/trellis/pull/1068))
+* [REVERT] Don't force install Ansible Galaxy in dev ([#1064](https://github.com/roots/trellis/pull/1064))
+
 ### 1.0.1: January 16th, 2019
 * Add Python 2 explicitly ([#1061](https://github.com/roots/trellis/pull/1061))
 

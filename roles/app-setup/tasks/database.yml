@@ -2,7 +2,7 @@
 - block:
   - name: Create databases for sites
     mysql_db:
-      name: "{{ site_env.db_name }}"
+      name: "{{ site_env.db_database | default(site_env.db_name) }}"
       state: present
       login_host: "{{ site_env.db_host }}"
       login_user: "{{ mysql_root_user }}"
@@ -11,11 +11,11 @@
 
   - name: Create/assign database user to db and grant permissions
     mysql_user:
-      name: "{{ site_env.db_user }}"
+      name: "{{ site_env.db_username | default(site_env.db_user) }}"
       password: "{{ site_env.db_password }}"
-      host: "{{ site_env.db_user_host }}"
+      host: "{{ site_env.db_user_host | default(site_env.db_host)  }}"
       append_privs: yes
-      priv: "{{ site_env.db_name }}.*:ALL"
+      priv: "{{ site_env.db_database | default(site_env.db_name) }}.*:ALL"
       state: present
       login_host: "{{ site_env.db_host }}"
       login_user: "{{ mysql_root_user }}"

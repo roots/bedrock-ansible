@@ -102,6 +102,7 @@ def update_ssh_config(main_hostname)
 
     File.write(config_file, content)
   else
+    FileUtils.mkdir_p(File.dirname(config_file), mode: 0700)
     File.write(config_file, vagrant_ssh_config)
   end
 end

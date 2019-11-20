@@ -13,6 +13,7 @@ project_source_path: "{{ project_root }}/shared/source"
 # These should not be part of project_shared_children since dependencies need to be atomic and tied to a deploy.
 project_copy_folders:
   - vendor
+  - node_modules
 
 # All the templates to process on the remote system on deploy. These could contain config files.
 # `src` and `dest` paths work the same as project_local_files.
@@ -45,8 +46,11 @@ project_environment:
 # - default is 'current'
 project_current_path: "{{ project.current_path | default('current') }}"
 
-# Whether to run `wp core update-db` at end of each deploy
+# Whether to run `wp core update-db` at end of each deploy (for WordPress sites)
 update_db_on_deploy: true
+
+# Whether to run `php artisan migrate` at end of each deploy (for Laravel sites)
+migrate_db_on_deploy: true
 
 # Helpers
 project: "{{ sites[site] }}"
@@ -61,6 +65,7 @@ deploy_build_before:
 
 deploy_build_after:
   - "{{ playbook_dir }}/roles/deploy/hooks/build-after.yml"
+  - "{{ playbook_dir }}/deploy-hooks/build-after.yml"
   # - "{{ playbook_dir }}/deploy-hooks/sites/{{ site }}-build-after.yml"
 
 deploy_finalize_before:

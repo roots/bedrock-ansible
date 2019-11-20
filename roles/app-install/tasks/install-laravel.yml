@@ -1,0 +1,49 @@
+---
+- name: Link storage directory
+  command: php artisan storage:link
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel')
+
+- name: Generate Application Key
+  command: php artisan key:generate
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel') and item.value.site_install | default(true)
+
+- name: Artisan clear cache
+  command: php artisan cache:clear
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel')
+
+- name: Artisan clear routes cache
+  command: php artisan route:clear
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel')
+
+- name: Artisan clear config cache
+  command: php artisan config:clear
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel')
+
+- name: Artisan clear view cache
+  command: php artisan view:clear
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel')
+
+- name: Run the database migrations
+  command: php artisan migrate
+  args:
+    chdir: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/"
+  with_dict: "{{ sites }}"
+  when: ((item.value.type | default('wordpress')) == 'laravel')

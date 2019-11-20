@@ -1,6 +1,6 @@
 # Documentation: https://github.com/nickhammond/ansible-logrotate
 logrotate_scripts:
-  - name: wordpress-sites
+  - name: sites
     path: "{{ www_root }}/**/logs/*.log"
     options:
       - weekly

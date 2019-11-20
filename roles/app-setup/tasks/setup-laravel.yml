@@ -1,0 +1,10 @@
+---
+- name: Setup Laravel system cron
+  cron:
+    name: "{{ item.key }} Laravel Artisan scheduler"
+    minute: "*/5"
+    user: "{{ web_user }}"
+    job: "php {{ www_root }}/{{ item.key }}/current/artisan schedule:run >> /dev/null 2>&1"
+    cron_file: "artisan-{{ item.key | replace('.', '_') }}"
+  with_dict: "{{ sites }}"
+  when: (item.value.type | default('wordpress')) == 'laravel'

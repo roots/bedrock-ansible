@@ -1,18 +1,24 @@
 ---
+- name: Ensure openssl configs directory are present
+  file:
+    path: "{{ nginx_ssl_path }}/self-signed-openssl-configs/"
+    state: directory
+    mode: "0755"
+
+- name: Template openssl configs
+  template:
+    src: self-signed-openssl-config.j2
+    dest: "{{ nginx_ssl_path }}/self-signed-openssl-configs/{{ item.key }}.cnf"
+  with_dict: "{{ sites | combine(ssl_default_site) }}"
+  when:
+    - sites_use_ssl
+    - ssl_enabled
+    - item.value.ssl.provider | default('manual') == 'self-signed'
+
 - name: Generate self-signed certificates
   shell: "openssl req -new -newkey rsa:2048 \
-    -days 3650 -nodes -x509 -sha256 \
-    -extensions req_ext -config <( \
-cat <<' EOF'\n
-[req]\n
-prompt = no\n
-distinguished_name = req_dn\n
-[req_dn]\n
-commonName = {{ item.value.site_hosts[0].canonical }}\n
-[req_ext]\n
-subjectAltName = {{ site_hosts | union(multisite_subdomains_wildcards) | map('regex_replace', '(.*)', 'DNS:\\1') | join(',') }}\n
-EOF\n
-    ) \
+    -days 825 -nodes -x509 -sha256 \
+    -extensions req_ext -config {{ nginx_ssl_path }}/self-signed-openssl-configs/{{ item.key }}.cnf \
     -keyout {{ item.key | quote }}.key -out {{ item.key | quote }}.cert"
   args:
     executable: "/bin/bash"
@@ -24,3 +30,8 @@ EOF\n
     - ssl_enabled
     - item.value.ssl.provider | default('manual') == 'self-signed'
   notify: reload nginx
+
+- name: Clean up openssl configs directory
+  file:
+    path: "{{ nginx_ssl_path }}/self-signed-openssl-configs/"
+    state: absent

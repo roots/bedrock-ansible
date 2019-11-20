@@ -1,0 +1,7 @@
+[req]
+prompt = no
+distinguished_name = req_dn
+[req_dn]
+commonName = {{ item.value.site_hosts[0].canonical }}
+[req_ext]
+subjectAltName = {{ site_hosts | union(multisite_subdomains_wildcards) | map('regex_replace', '(.*)', 'DNS:\\1') | join(',') }}

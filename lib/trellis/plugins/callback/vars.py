@@ -12,6 +12,7 @@ from ansible.playbook.play_context import PlayContext
 from ansible.playbook.task import Task
 from ansible.plugins.callback import CallbackBase
 from ansible.template import Templar
+from ansible.utils.unsafe_proxy import wrap_var
 
 
 class CallbackModule(CallbackBase):
@@ -21,7 +22,14 @@ class CallbackModule(CallbackBase):
     CALLBACK_NAME = 'vars'
 
     def __init__(self):
-        self._options = cli.options if cli else None
+        super(CallbackModule, self).__init__()
+
+        # handle Ansible 2.7 and 2.8 cases by normalizing each into a dict
+        try:
+            from ansible import context
+            self._options = context.CLIARGS
+        except ImportError:
+            self._options = vars(cli.options) if cli else {}
 
     def raw_triage(self, key_string, item, patterns):
         # process dict values
@@ -35,7 +43,7 @@ class CallbackModule(CallbackBase):
         # wrap values if they match raw_vars pattern
         elif isinstance(item, AnsibleUnicode):
             match = next((pattern for pattern in patterns if re.match(pattern, key_string)), None)
-            return AnsibleUnicode(''.join(['{% raw %}', item, '{% endraw %}'])) if not item.startswith(('{% raw', '{%raw')) and match else item
+            return wrap_var(item) if match else item
 
         else:
             return item
@@ -69,13 +77,13 @@ class CallbackModule(CallbackBase):
             }
 
         for option,value in iteritems(strings):
-            if getattr(self._options, value, False):
-                options.append("{0}='{1}'".format(option, str(getattr(self._options, value))))
+            if self._options.get(value, False):
+                options.append("{0}='{1}'".format(option, str(self._options.get(value))))
 
-        for inventory in getattr(self._options, 'inventory'):
+        for inventory in self._options.get('inventory'):
             options.append("--inventory='{}'".format(str(inventory)))
 
-        if getattr(self._options, 'ask_vault_pass', False):
+        if self._options.get('ask_vault_pass', False):
             options.append('--ask-vault-pass')
 
         return ' '.join(options)
@@ -97,11 +105,10 @@ class CallbackModule(CallbackBase):
             env_group.set_priority(20)
 
         for host in play.get_variable_manager()._inventory.list_hosts(play.hosts[0]):
-            # it should be ok to remove dummy Task() once minimum required Ansible >= 2.4.2
-            hostvars = play.get_variable_manager().get_vars(play=play, host=host, task=Task())
+            hostvars = play.get_variable_manager().get_vars(play=play, host=host)
             self.raw_vars(play, host, hostvars)
-            host.vars['ssh_args_default'] = PlayContext(play=play, options=self._options)._ssh_args.default
+            host.vars['ssh_args_default'] = PlayContext(play=play)._ssh_args.default
             host.vars['cli_options'] = self.cli_options()
-            host.vars['cli_ask_pass'] = getattr(self._options, 'ask_pass', False)
-            host.vars['cli_ask_become_pass'] = getattr(self._options, 'become_ask_pass', False)
+            host.vars['cli_ask_pass'] = self._options.get('ask_pass', False)
+            host.vars['cli_ask_become_pass'] = self._options.get('become_ask_pass', False)
             host.vars['darwin_without_passlib'] = self.darwin_without_passlib()

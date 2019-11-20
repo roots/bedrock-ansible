@@ -4,7 +4,7 @@ missing_hosts: "{{ site_hosts | difference((current_hosts.results | selectattr('
 letsencrypt_cert_ids: "{ {% for item in (generate_cert_ids | default({'results':[{'skipped':True}]})).results if item is not skipped %}'{{ item.item.key }}':'{{ item.stdout }}', {% endfor %} }"
 
 acme_tiny_repo: 'https://github.com/diafygi/acme-tiny.git'
-acme_tiny_commit: '4ed13950c0a9cf61f1ca81ff1874cde1cf48ab32'
+acme_tiny_commit: 'cb094cf3efa34acef8c7139c8480e2135422e755'
 
 acme_tiny_software_directory: /usr/local/letsencrypt
 acme_tiny_data_directory: /var/lib/letsencrypt
@@ -24,13 +24,9 @@ acme_tiny_challenges_directory: "{{ www_root }}/letsencrypt"
 #  KWXliiWjUORxDxI1c56Rw2VCIExnFjWJAdSLv6/XaQWo2T7U28bkKbAlCF9=
 #  -----END RSA PRIVATE KEY-----
 
-letsencrypt_ca: 'https://acme-v01.api.letsencrypt.org'
+letsencrypt_ca: 'https://acme-v02.api.letsencrypt.org'
 
 letsencrypt_account_key: '{{ acme_tiny_data_directory }}/account.key'
-
-letsencrypt_intermediate_cert_path: /etc/ssl/certs/lets-encrypt-x3-cross-signed.pem
-letsencrypt_intermediate_cert_url: 'https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem'
-letsencrypt_intermediate_cert_sha256sum: 'e446c5e9dbef9d09ac9f7027c034602492437a05ff6c40011d7235fca639c79a'
 
 letsencrypt_keys_dir: "{{ nginx_ssl_path }}/letsencrypt"
 letsencrypt_certs_dir: "{{ nginx_ssl_path }}/letsencrypt"

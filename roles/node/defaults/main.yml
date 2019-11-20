@@ -1,0 +1,50 @@
+---
+#SEMVER
+role_version: "1.2.1-trellis"
+
+role_repo: "https://github.com/morgangraphics/ansible-role-nvm"
+
+# Set the specific version of Node.js to install ("4.8.0", "6.11.0").
+# use lts for latest Long Term Release
+# Version numbers from Nodesource: https://github.com/nodesource/distributions
+nodejs_version: "lts"
+
+# NVM has a bash autocomplete functionality for when a user logs into a machine. Cool feature
+# but only works when a human logs into said machine. More of a convienence method for this role
+autocomplete: false
+
+# NVM will automatically alias First Run version as default which is more than likely what people will use this for
+# This will allow for installation/upgrade of multiple versions on an existing machine for the scenarios described in
+# https://github.com/morgangraphics/ansible-role-nvm/pull/7#issuecomment-481423099
+default: false
+
+# The next 3 options only apply to wget and curl - If you don't know what you're doing
+# you are fine to leave these alone.
+#
+# NVM Default directory
+# NVM documentation states you can change NVM_DIR to NVM_DIR=/usr/local/nvm bash for a global install.
+# nvm_dir: "{{ansible_env.HOME}}/.nvm"
+nvm_dir: "/home/{{ web_user }}/.nvm"
+
+# AdHoc NVM Commands
+nvm_commands: []
+
+# Options are wget, curl, git
+# Git :default dest: is the same as nvm_profile below.
+nvm_install: "wget"
+
+# NVM Profile location Options are .profile, .bashrc, .bash_profile, .zshrc"
+nvm_profile: ".bashrc"
+
+# NVM source location - i.e. you host your own fork
+nvm_source: ""
+
+# Version of NVM to install
+nvm_version: "0.35.1"
+
+# Uninstall NVM
+uninstall: false
+
+npm_config_prefix: ".npm"
+
+nodejs_npm_global_packages: "yarn"

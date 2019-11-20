@@ -1,0 +1,39 @@
+---
+- block:
+  - name: Remove WordPress transient containing old release path
+    shell: "{{ project.multisite.enabled | default(false) | ternary('wp network meta delete 1', 'wp option delete') }} _site_transient_theme_roots ||:"
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+    register: site_transient_theme_roots
+    changed_when: site_transient_theme_roots.stdout != ''
+    when: project.update_wp_theme_paths | default(update_wp_theme_paths | default(true)) | bool
+
+  - name: Update WP theme paths
+    command: >
+      wp option set {{ item[0].option }}
+      {{ item[1] | regex_replace('.*' + deploy_helper.releases_path + '/[^/]*(.*)', deploy_helper.new_release_path + '\1') }}
+      {% if project.multisite.enabled | default(false) %} --url={{ item[1].split(' ')[0] }}{% endif %}
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+    when: project.update_wp_theme_paths | default(update_wp_theme_paths | default(true)) | bool
+    with_subelements:
+      - "[{% for result in wp_template_root.results %}{'option': '{{ result.item }}', 'stdout_lines': {{ result.stdout_lines | default ([]) | select('search', deploy_helper.releases_path) | list }}},{% endfor %}]"
+      - stdout_lines
+
+  - name: Warn about updating network database.
+    debug:
+      msg: "Updating the network database could take a long time with a large number of sites."
+    when: project.update_db_on_deploy | default(update_db_on_deploy) and project.multisite.enabled | default(false)
+
+  - name: Update WP database
+    command: wp core update-db {{ project.multisite.enabled | default(false) | ternary('--network', '') }}
+    args:
+      chdir: "{{ deploy_helper.current_path }}"
+    when: project.update_db_on_deploy | default(update_db_on_deploy)
+
+  when: wp_installed.rc == 0
+
+- name: Reload php-fpm
+  shell: sudo service php7.3-fpm reload
+  args:
+    warn: false

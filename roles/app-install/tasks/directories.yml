@@ -1,7 +1,7 @@
 ---
 - name: Create web root of sites
   file:
-    path: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/web"
+    path: "{{ www_root }}/{{ item.key }}/{{ item.value.current_path | default('current') }}/{{ item.value.web_root | default( (site_type == 'laravel') | ternary('public', 'web') ) }}"
     owner: "{{ web_user }}"
     group: "{{ web_group }}"
     mode: 0755

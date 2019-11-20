@@ -1,0 +1,19 @@
+---
+- include: nvm.yml
+  tags: nvm
+
+- block:
+  - name: Check node Version
+    shell: "bash -c 'source {{ nvm_dir }}/nvm.sh && node -v'"
+    register: node_version
+
+  - name: Define node path
+    set_fact:
+      node_path: "{{ nvm_dir }}/versions/node/{{ node_version.stdout }}"
+
+  - name: Ensure npm global packages are installed
+    shell: "bash -c 'source {{ nvm_dir }}/nvm.sh && npm i -g {{ nodejs_npm_global_packages }}'"
+    register: npm_installed_global_packages
+
+  become: true
+  become_user: "{{ web_user }}"

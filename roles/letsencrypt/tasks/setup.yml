@@ -37,9 +37,3 @@
   args:
     creates: "{{ letsencrypt_account_key }}"
   when: letsencrypt_account_key_source_content is not defined and letsencrypt_account_key_source_file is not defined
-
-- name: Download intermediate certificate
-  get_url:
-    url: "{{ letsencrypt_intermediate_cert_url }}"
-    dest: "{{ letsencrypt_intermediate_cert_path }}"
-    sha256sum: "{{ letsencrypt_intermediate_cert_sha256sum }}"

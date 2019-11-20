@@ -1,5 +1,5 @@
 ---
-nginx_ppa: "ppa:nginx/development"
+nginx_ppa: "ppa:nginx/mainline"
 nginx_package: nginx
 nginx_conf: nginx.conf.j2
 nginx_path: /etc/nginx

@@ -1,0 +1,80 @@
+version: 2.1
+
+orbs:
+  trellis:
+    executors:
+      python-2:
+        docker:
+          - image: 'circleci/python:2-stretch'
+      python-3:
+        docker:
+          - image: 'circleci/python:3-stretch'
+
+    jobs:
+      syntax-check:
+        parameters:
+          ansible-version:
+            type: string
+          python-version:
+            type: enum
+            enum: ['3', '2']
+        executor: python-<< parameters.python-version >>
+        steps:
+          - run: python --version
+          - checkout
+          - restore_cache:
+              keys:
+                - ansible-v1-<< parameters.python-version >>-<< parameters.ansible-version >>-{{ checksum "galaxy.yml" }}
+          - run:
+              name: Install Python dependencies in a venv
+              command: |
+                virtualenv venv
+                . venv/bin/activate
+                pip install ansible<< parameters.ansible-version >>
+                ansible --version
+          - run:
+              name: Install Galaxy roles
+              command: |
+                . venv/bin/activate
+                ansible-galaxy install -r galaxy.yml
+          - save_cache:
+              key: ansible-v1-<< parameters.python-version >>-<< parameters.ansible-version >>-{{ checksum "galaxy.yml" }}
+              paths:
+                - venv
+                - vendor
+          - run:
+              name: Check Playbook syntax
+              command: |
+                . venv/bin/activate
+                ansible-playbook --syntax-check -e env=development deploy.yml
+                ansible-playbook --syntax-check -e env=development dev.yml
+                ansible-playbook --syntax-check -e env=development server.yml
+
+workflows:
+  syntax-check:
+    jobs:
+      - trellis/syntax-check:
+          name: syntax-check-python-3-ansible-latest
+          python-version: '3'
+          ansible-version: ''
+      - trellis/syntax-check:
+          name: syntax-check-python-3-ansible-2.8
+          python-version: '3'
+          ansible-version: ~=2.8.0
+      - trellis/syntax-check:
+          name: syntax-check-python-3-ansible-2.7
+          python-version: '3'
+          ansible-version: ~=2.7.0
+
+      - trellis/syntax-check:
+          name: syntax-check-python-2-ansible-latest
+          python-version: '2'
+          ansible-version: ''
+      - trellis/syntax-check:
+          name: syntax-check-python-2-ansible-2.8
+          python-version: '2'
+          ansible-version: ~=2.8.0
+      - trellis/syntax-check:
+          name: syntax-check-python-2-ansible-2.7
+          python-version: '2'
+          ansible-version: ~=2.7.0

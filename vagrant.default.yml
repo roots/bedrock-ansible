@@ -4,7 +4,7 @@ vagrant_cpus: 1
 vagrant_memory: 1024 # in MB
 vagrant_box: 'bento/ubuntu-18.04'
 vagrant_box_version: '>= 201807.12.0'
-vagrant_ansible_version: '2.7.5'
+vagrant_ansible_version: '2.7.12'
 vagrant_skip_galaxy: false
 vagrant_mount_type: 'nfs'
 

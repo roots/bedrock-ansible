@@ -9,13 +9,21 @@
     msg: "Unable to find a `composer.json` file in the root of '{{ deploy_helper.new_release_path }}'. Make sure your repo has a `composer.json` file in its root or edit `repo_subtree_path` for '{{ site }}' in `sites.yml` so it points to the directory with a `composer.json` file."
   when: not composer_json.stat.exists
 
-- name: Setup packagist.com authentication
+- name: Setup composer authentications
   composer:
     command: config
-    arguments: --auth http-basic.repo.packagist.com token {{ project.packagist_token }}
+    arguments: --auth http-basic.{{ composer_authentication.hostname }} {{ composer_authentication.username }} {{ composer_authentication.password }}
     working_dir: "{{ deploy_helper.new_release_path }}"
   no_log: true
-  when: project.packagist_token is defined
+  changed_when: false
+  when:
+    - composer_authentication.hostname is defined and composer_authentication.hostname != ""
+    - composer_authentication.username is defined and composer_authentication.username != ""
+    - composer_authentication.password is defined and composer_authentication.password != ""
+  loop: "{{ composer_authentications }}"
+  loop_control:
+    loop_var: composer_authentication
+    label: "{{ composer_authentication.hostname }}"
 
 - name: Install Composer dependencies
   composer:

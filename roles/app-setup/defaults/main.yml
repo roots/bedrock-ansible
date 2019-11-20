@@ -28,9 +28,16 @@ hsts_preload: "{{ item.value.ssl.hsts_preload | default(nginx_hsts_preload) | te
 
 # Fastcgi cache params
 nginx_cache_duration: 30s
-nginx_skip_cache_uri: /wp-admin/|/wp-json/|/xmlrpc.php|wp-.*.php|/feed/|index.php|sitemap(_index)?.xml
-nginx_skip_cache_cookie: comment_author|wordpress_[a-f0-9]+|wp-postpass|wordpress_no_cache|wordpress_logged_in
+apps_nginx_skip_cache_uri:
+  wordpress: /wp-admin/|/wp-json/|/xmlrpc.php|wp-.*.php|/feed/|index.php|sitemap(_index)?.xml
+  laravel: ""
+nginx_skip_cache_uri: "{{ apps_nginx_skip_cache_uri[ site_type ] | default('') }}"
+apps_nginx_skip_cache_cookie:
+  wordpress: comment_author|wordpress_[a-f0-9]+|wp-postpass|wordpress_no_cache|wordpress_logged_in
+  laravel: ""
+nginx_skip_cache_cookie: "{{ apps_nginx_skip_cache_cookie[ site_type ] | default('') }}"
 nginx_cache_background_update: "on"
+
 
 # Nginx includes
 nginx_includes_templates_path: nginx-includes

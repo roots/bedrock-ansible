@@ -15,7 +15,7 @@
 
 - name: Generate Lets Encrypt certificate IDs
   shell: |
-    echo "{{ [site_hosts | join(' '), letsencrypt_ca, acme_tiny_commit, letsencrypt_intermediate_cert_sha256sum] | join('\n') }}" |
+    echo "{{ [site_hosts | join(' '), letsencrypt_ca, acme_tiny_commit] | join('\n') }}" |
     cat {{ letsencrypt_account_key }} {{ letsencrypt_keys_dir }}/{{ item.key }}.key - |
     md5sum | cut -c -7
   register: generate_cert_ids

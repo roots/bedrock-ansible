@@ -1,0 +1,27 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: dm00000
+  description: NVM installation for Linux
+  company: "MORGANGRAPHICS"
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.0
+  platforms:
+    - name: EL
+      versions:
+      - 6
+      - 7
+    - name: Debian
+      versions:
+      - all
+    - name: Ubuntu
+      versions:
+      - precise
+      - raring
+      - saucy
+      - trusty
+      - xenial
+  galaxy_tags:
+    - development
+    - web

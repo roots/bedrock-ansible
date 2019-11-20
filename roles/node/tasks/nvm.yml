@@ -1,0 +1,153 @@
+---
+# wget (default) or curl
+- block:
+  - name: Check if wget or curl is installed
+    command: "which {{ nvm_install }}"
+    register: cmd
+
+  - name: Determine if install type wget
+    set_fact:
+      run_command: 'wget -qO-'
+    when: "'/wget' in cmd.stdout"
+
+  - name: Determine if install type curl
+    set_fact:
+      run_command: 'curl -o-'
+    when: "'/curl' in cmd.stdout"
+
+  - name: Create destination dir if it does not exist
+    file:
+      mode: 0775
+      path: "{{ nvm_dir }}"
+      state: directory
+    when: "nvm_dir != ''"
+
+  - name: Install NVM
+    shell: "{{ run_command }} https://raw.githubusercontent.com/creationix/nvm/v{{ nvm_version }}/install.sh | NVM_SOURCE={{ nvm_source }} NVM_DIR={{ nvm_dir }} PROFILE={{ nvm_profile }} bash"
+    args:
+      warn: false
+    register: nvm_result
+
+  when: "nvm_install == 'curl' or  nvm_install == 'wget'"
+  become: true
+  become_user: "{{ web_user }}"
+
+# git
+- block:
+    - name: Check if git is installed
+      command: "which {{ nvm_install }}"
+      register: cmd
+
+    - name: Remove NVM nvm_profile
+      blockinfile:
+        block: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
+        marker_begin: "Installed via {{ role_repo }} START"
+        marker_end: "{{ role_repo }} END"
+        path: "{{ nvm_profile }}"
+        state: absent
+
+    - name: Install via git
+      git:
+        dest: "{{ nvm_dir }}"
+        repo: 'https://github.com/creationix/nvm.git .nvm'
+        version: "{{ nvm_version }}"
+      when: "'/git' in cmd.stdout"
+
+    - name: Add NVM to nvm_profile
+      blockinfile:
+        block: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
+        create: yes
+        marker_begin: "Installed via {{ role_repo }} START"
+        marker_end: "{{ role_repo }} END"
+        mode: 0644
+        path: "{{ nvm_profile }}"
+        state: present
+
+  when: "nvm_install == 'git'"
+  become: true
+  become_user: "{{ web_user }}"
+
+- block:
+  - name: Check NVM Version
+    become: true
+    become_user: "{{ web_user }}"
+    shell: bash -c "source $HOME/.nvm/nvm.sh && nvm --version"
+    register: version_response
+
+  # Autocomplete
+  - name: Add NVM autocomplete to nvm_profile
+    become: true
+    become_user: "{{ web_user }}"
+    blockinfile:
+      block: |
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+      insertafter: "# This loads nvm"
+      marker_begin: "Installed via {{ role_repo }} START"
+      marker_end: "{{ role_repo }} END"
+      mode: 0644
+      path: "{{ nvm_profile }}"
+      state: present
+    when: "autocomplete == True"
+
+  - name: LTS Check
+    set_fact:
+      nodejs_version: --lts
+    when: "nodejs_version == 'lts'"
+
+  # This scenario handles the first run/install of NVM because this will automatically
+  # alias the specified version as default - This should handle most use cases
+  - name: Install Node
+    become: true
+    become_user: "{{ web_user }}"
+    shell: bash -c "source $HOME/.nvm/nvm.sh && nvm install {{ nodejs_version }}"
+    # when: "nvm_commands | length == 0 or default == False"
+
+  # In the event there are multiple versions of Node being installed/used/upgraded
+  # on the same machine we'll need to alias the default version accordingly
+  - name: Set default version of Node if multiple versions exist
+    become: true
+    become_user: "{{ web_user }}"
+    shell: bash -c "source $HOME/.nvm/nvm.sh && nvm alias default {{ nodejs_version }}"
+    when:  "default == True"
+
+  - name: Run whatever nvm_commands are there
+    become: true
+    become_user: "{{ web_user }}"
+    shell: bash -c "source $HOME/.nvm/nvm.sh && {{ item }}"
+    with_items:
+      "{{ nvm_commands }}"
+    when: "nvm_commands | length >= 1"
+
+  become: true
+  become_user: "{{ web_user }}"
+
+# Uninstall NVM
+- block:
+
+  - name: Uninstall NVM
+    file:
+      path: "{{ lookup('env','NVM_DIR') }}"
+      state: absent
+
+  - name: Remove NVM nvm_profile info
+    lineinfile:
+      regexp: '^export.+nvm\"|\[.+nvm'
+      path: "{{ nvm_profile }}"
+      state: absent
+
+  - name: Remove NVM autocomplete from nvm_profile
+    blockinfile:
+      block: |
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+      marker_begin: "Installed via {{ role_repo }} START"
+      marker_end: "{{ role_repo }} END"
+      path: "{{ nvm_profile }}"
+      state: absent
+
+  when: "uninstall == True"
+  become: true
+  become_user: "{{ web_user }}"

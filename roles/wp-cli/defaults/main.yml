@@ -1,5 +1,5 @@
 gpg2_package: gnupg2
-wp_cli_version: 2.0.1
+wp_cli_version: 2.3.0
 wp_cli_bin_path: /usr/bin/wp
 wp_cli_phar_url: "https://github.com/wp-cli/wp-cli/releases/download/v{{ wp_cli_version }}/wp-cli-{{ wp_cli_version }}.phar"
 wp_cli_phar_asc_url: "https://github.com/wp-cli/wp-cli/releases/download/v{{ wp_cli_version }}/wp-cli-{{ wp_cli_version }}.phar.asc"
