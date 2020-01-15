@@ -11,7 +11,7 @@ server {
   listen [::]:443 ssl default_server deferred;
   listen 443 ssl default_server deferred;
 
-  include h5bp/directive-only/ssl.conf;
+  include h5bp/ssl/ocsp_stapling.conf;
   ssl_dhparam /etc/nginx/ssl/dhparams.pem;
 
   ssl_certificate         {{ nginx_path }}/ssl/no_default.cert;

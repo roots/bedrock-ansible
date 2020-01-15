@@ -31,6 +31,12 @@
     dest: "{{ nginx_path }}"
   notify: reload nginx
 
+- name: Copy mime.types
+  copy:
+    src: templates/mime.types
+    dest: "{{ nginx_path }}"
+  notify: reload nginx
+
 - name: Create nginx.conf
   template:
     src: "{{ nginx_conf }}"

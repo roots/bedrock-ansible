@@ -53,9 +53,18 @@ http {
   {% block http_begin %}{% endblock %}
 
   {% block server_tokens -%}
-  # Hide nginx version information.
-  # Default: on
-  server_tokens off;
+  # Hide Nginx version information.
+  include h5bp/security/server_software_information.conf;
+  {% endblock %}
+
+  {% block charset_types -%}
+  # Specify media (MIME) types for files.
+  include h5bp/media_types/media_types.conf;
+  {% endblock %}
+
+  {% block character_encodings -%}
+  # Set character encodings.
+  include h5bp/media_types/character_encodings.conf;
   {% endblock %}
 
   {% block cache -%}
@@ -70,28 +79,6 @@ http {
   fastcgi_ignore_headers Cache-Control Expires Set-Cookie;
   fastcgi_pass_header Set-Cookie;
   fastcgi_pass_header Cookie;
-  {% endblock %}
-
-  {% block mime_types -%}
-  # Specify MIME types for files.
-  include       h5bp/mime.types;
-
-  # Default: text/plain
-  default_type  application/octet-stream;
-  {% endblock %}
-
-  {% block charset_types -%}
-  # Update charset_types to match updated mime.types.
-  # text/html is always included by charset module.
-  # Default: text/html text/xml text/plain text/vnd.wap.wml application/javascript application/rss+xml
-  charset_types
-    text/css
-    text/plain
-    text/vnd.wap.wml
-    application/javascript
-    application/json
-    application/rss+xml
-    application/xml;
   {% endblock %}
 
   {% block log_format -%}
@@ -134,71 +121,55 @@ http {
   {% endblock %}
 
   {% block compression -%}
-  # Compression
-
   # Enable gzip compression.
-  # Default: off
-  gzip on;
-
-  # Compression level (1-9).
-  # 5 is a perfect compromise between size and CPU usage, offering about
-  # 75% reduction for most ASCII files (almost identical to level 9).
-  # Default: 1
-  gzip_comp_level    5;
-
-  # Don't compress anything that's already small and unlikely to shrink much
-  # if at all (the default is 20 bytes, which is bad as that usually leads to
-  # larger files after gzipping).
-  # Default: 20
-  gzip_min_length    256;
-
-  # Compress data even for clients that are connecting to us via proxies,
-  # identified by the "Via" header (required for CloudFront).
-  # Default: off
-  gzip_proxied       any;
-
-  # Tell proxies to cache both the gzipped and regular version of a resource
-  # whenever the client's Accept-Encoding capabilities header varies;
-  # Avoids the issue where a non-gzip capable client (which is extremely rare
-  # today) would display gibberish if their proxy gave them the gzipped version.
-  # Default: off
-  gzip_vary          on;
-
-  # Compress all output labeled with one of the following MIME-types.
-  # text/html is always compressed by gzip module.
-  # Default: text/html
-  gzip_types
-    application/atom+xml
-    application/javascript
-    application/json
-    application/ld+json
-    application/manifest+json
-    application/rss+xml
-    application/vnd.geo+json
-    application/vnd.ms-fontobject
-    application/x-font-ttf
-    application/x-web-app-manifest+json
-    application/xhtml+xml
-    application/xml
-    font/opentype
-    image/bmp
-    image/svg+xml
-    image/x-icon
-    text/cache-manifest
-    text/css
-    text/plain
-    text/vcard
-    text/vnd.rim.location.xloc
-    text/vtt
-    text/x-component
-    text/x-cross-domain-policy;
-
-  # This should be turned on if you are going to have pre-compressed copies (.gz) of
-  # static files available. If not it should be left off as it will cause extra I/O
-  # for the check. It is best if you enable this in a location{} block for
-  # a specific directory, or on an individual server{} level.
-  # gzip_static on;
+  include h5bp/web_performance/compression.conf;
   {% endblock %}
+
+  # Add X-XSS-Protection for HTML documents.
+  # h5bp/security/x-xss-protection.conf
+  map $sent_http_content_type $x_xss_protection {
+    #           (1)    (2)
+    ~*text/html "1; mode=block";
+  }
+
+  # Add X-Frame-Options for HTML documents.
+  # h5bp/security/x-frame-options.conf
+  map $sent_http_content_type $x_frame_options {
+    ~*text/html DENY;
+  }
+
+  # Add Content-Security-Policy for HTML documents.
+  # h5bp/security/content-security-policy.conf
+  map $sent_http_content_type $content_security_policy {
+    ~*text/html "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
+  }
+
+  # Add Referrer-Policy for HTML documents.
+  # h5bp/security/referrer-policy.conf.conf
+  map $sent_http_content_type $referrer_policy {
+    ~*text/html "no-referrer-when-downgrade";
+  }
+
+  # Add X-UA-Compatible for HTML documents.
+  # h5bp/internet_explorer/x-ua-compatible.conf
+  map $sent_http_content_type $x_ua_compatible {
+    ~*text/html "IE=edge";
+  }
+
+  # Add Access-Control-Allow-Origin.
+  # h5bp/cross-origin/requests.conf
+  map $sent_http_content_type $cors {
+    # Images
+    ~*image/ "*";
+
+    # Web fonts
+    ~*font/                         "*";
+    ~*application/vnd.ms-fontobject "*";
+    ~*application/x-font-ttf        "*";
+    ~*application/font-woff         "*";
+    ~*application/x-font-woff       "*";
+    ~*application/font-woff2        "*";
+  }
 
   {% block http_includes_d -%}
   include includes.d/http/*.conf;

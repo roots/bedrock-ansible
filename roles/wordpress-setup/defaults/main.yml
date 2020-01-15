@@ -41,14 +41,29 @@ nginx_includes_d_cleanup: true
 # h5bp helpers
 not_dev: "{{ env != 'development' }}"
 h5bp: "{{ item.value.h5bp | default({}) }}"
-h5bp_cache_file_descriptors_enabled: "{{ h5bp.cache_file_descriptors | default(not_dev) }}"
-h5bp_extra_security_enabled: "{{ h5bp.extra_security | default(true) }}"
-h5bp_no_transform_enabled: "{{ h5bp.no_transform | default(false) }}"
-h5bp_x_ua_compatible_enabled: "{{ h5bp.x_ua_compatible | default(true) }}"
-h5bp_cache_busting_enabled: "{{ h5bp.cache_busting | default(false) }}"
-h5bp_cross_domain_fonts_enabled: "{{ h5bp.cross_domain_fonts | default(true) }}"
-h5bp_expires_enabled: "{{ h5bp.expires | default(false) }}"
-h5bp_protect_system_files_enabled: "{{ h5bp.protect_system_files | default(true) }}"
+# cross origin
+h5bp_cross_origin_requests: "{{ ( h5bp.cross_origin | default({}) ).requests | default(true) }}"
+h5bp_cross_origin_resource_timing: "{{ ( h5bp.cross_origin | default({}) ).resource_timing | default(false) }}"
+# errors
+h5bp_errors_custom_errors: "{{ ( h5bp.errors | default({}) ).custom_errors | default(false) }}"
+# internet_explorer
+h5bp_internet_explorer_x_ua_compatible: "{{ ( h5bp.internet_explorer | default({}) ).x_ua_compatible | default(true) }}"
+# location
+h5bp_location_security_file_access: "{{ ( h5bp.location | default({}) ).security_file_access | default(true) }}"
+h5bp_location_web_performance_filename_based_cache_busting: "{{ ( h5bp.location | default({}) ).web_performance_filename_based_cache_busting | default(false) }}"
+h5bp_location_web_performance_svgz_compression: "{{ ( h5bp.location | default({}) ).web_performance_svgz_compression | default(false) }}"
+# security
+h5bp_security_content_security_policy: "{{ ( h5bp.security | default({}) ).content_security_policy | default(false) }}"
+h5bp_security_referrer_policy: "{{ ( h5bp.security | default({}) ).referrer_policy | default(true) }}"
+h5bp_security_strict_transport_security: "{{ ( h5bp.security | default({}) ).strict_transport_security | default(false) }}"
+h5bp_security_x_content_type_options: "{{ ( h5bp.security | default({}) ).x_content_type_options | default(true) }}"
+h5bp_security_x_frame_options: "{{ ( h5bp.security | default({}) ).x_frame_options | default(true) }}"
+h5bp_security_x_xss_protection: "{{ ( h5bp.security | default({}) ).x_xss_protection | default(true) }}"
+# web_performance
+h5bp_web_performance_cache_expiration: "{{ ( h5bp.web_performance | default({}) ).expiration | default(false) }}"
+h5bp_web_performance_cache_file_descriptors: "{{ ( h5bp.web_performance | default({}) ).cache_file_descriptors | default(not_dev) }}"
+h5bp_web_performance_pre_compressed_content_brotli: "{{ ( h5bp.web_performance | default({}) ).pre_compressed_content_brotli | default(false) }}"
+h5bp_web_performance_pre_compressed_content_gzip: "{{ ( h5bp.web_performance | default({}) ).compressed_content_gzip | default(false) }}"
 
 # PHP FPM
 php_fpm_pm_max_children: 10

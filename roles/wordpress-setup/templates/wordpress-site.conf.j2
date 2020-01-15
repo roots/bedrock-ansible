@@ -121,7 +121,7 @@ server {
     deny all;
   }
   {% endblock %}
-  
+
   {% block blade_twig_templates -%}
   # Prevent Blade and Twig templates from being accessed directly.
   location ~* \.(blade\.php|twig)$ {
@@ -166,36 +166,73 @@ server {
   {% endblock %}
 
   {% block h5bp -%}
-  {% if h5bp_cache_file_descriptors_enabled -%}
-  include h5bp/directive-only/cache-file-descriptors.conf;
+
+  {% if h5bp_cross_origin_requests -%}
+  include h5bp/cross-origin/requests.conf;
   {% endif -%}
 
-  {% if h5bp_extra_security_enabled -%}
-  include h5bp/directive-only/extra-security.conf;
+  {% if h5bp_cross_origin_resource_timing -%}
+  include h5bp/cross-origin/resource_timing.conf;
   {% endif -%}
 
-  {% if h5bp_no_transform_enabled -%}
-  include h5bp/directive-only/no-transform.conf;
+  {% if h5bp_errors_custom_errors -%}
+  include h5bp/errors/custom_errors.conf;
   {% endif -%}
 
-  {% if h5bp_x_ua_compatible_enabled -%}
-  include h5bp/directive-only/x-ua-compatible.conf;
+  {% if h5bp_internet_explorer_x_ua_compatible -%}
+  include h5bp/internet_explorer/x-ua-compatible.conf;
   {% endif -%}
 
-  {% if h5bp_cache_busting_enabled -%}
-  include h5bp/location/cache-busting.conf;
+  {% if h5bp_location_security_file_access -%}
+  include h5bp/location/security_file_access.conf;
   {% endif -%}
 
-  {% if h5bp_cross_domain_fonts_enabled -%}
-  include h5bp/location/cross-domain-fonts.conf;
+  {% if h5bp_location_web_performance_filename_based_cache_busting -%}
+  include h5bp/location/web_performance_filename-based_cache_busting.conf;
   {% endif -%}
 
-  {% if h5bp_expires_enabled -%}
-  include h5bp/location/expires.conf;
+  {% if h5bp_location_web_performance_svgz_compression -%}
+  include h5bp/location/web_performance_svgz-compression.conf;
   {% endif -%}
 
-  {% if h5bp_protect_system_files_enabled -%}
-  include h5bp/location/protect-system-files.conf;
+  {% if h5bp_security_content_security_policy -%}
+  include h5bp/security/content-security-policy.conf;
+  {% endif -%}
+
+  {% if h5bp_security_referrer_policy -%}
+  include h5bp/security/referrer-policy.conf;
+  {% endif -%}
+
+  {% if h5bp_security_strict_transport_security -%}
+  include h5bp/security/strict-transport-security.conf;
+  {% endif -%}
+
+  {% if h5bp_security_x_content_type_options -%}
+  include h5bp/security/x-content-type-options.conf;
+  {% endif -%}
+
+  {% if h5bp_security_x_frame_options -%}
+  include h5bp/security/x-frame-options.conf;
+  {% endif -%}
+
+  {% if h5bp_security_x_xss_protection -%}
+  include h5bp/security/x-xss-protection.conf;
+  {% endif -%}
+
+  {% if h5bp_web_performance_cache_expiration -%}
+  include h5bp/web_performance/cache_expiration.conf;
+  {% endif -%}
+
+  {% if h5bp_web_performance_cache_file_descriptors -%}
+  include h5bp/web_performance/cache-file-descriptors.conf;
+  {% endif -%}
+
+  {% if h5bp_web_performance_pre_compressed_content_brotli -%}
+  include h5bp/web_performance/pre-compressed_content_brotli.conf;
+  {% endif -%}
+
+  {% if h5bp_web_performance_pre_compressed_content_gzip -%}
+  include h5bp/web_performance/pre-compressed_content_gzip.conf;
   {% endif -%}
 
   {% endblock %}
