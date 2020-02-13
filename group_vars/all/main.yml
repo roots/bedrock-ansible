@@ -11,6 +11,10 @@ www_root: /srv/www
 ip_whitelist:
   - "{{ (env == 'development') | ternary(ansible_default_ipv4.gateway, ipify_public_ip | default('')) }}"
 
+# Deploy using git archive to bundle up the repo, if using git submodules, set this to false
+deploy_using_git_archive: true
+
+
 # Values of raw_vars will be wrapped in `{% raw %}` to avoid templating problems if values include `{%` and `{{`.
 # Will recurse dicts/lists. `*` is wildcard for one or more dict keys, list indices, or strings. Example:
 #   - vault_wordpress_sites.*.*_salt    -- matches vault_wordpress_sites.example.com.env.secure_auth_salt etc.

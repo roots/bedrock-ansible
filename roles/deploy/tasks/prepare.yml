@@ -21,17 +21,28 @@
     path: "{{ deploy_helper.new_release_path }}"
     state: directory
 
+- name: Copy files to new build dir
+  shell: cp -pr {{ project_source_path }}/* {{ deploy_helper.new_release_path }}
+  when: deploy_using_git_archive==false and project.repo_subtree_path is not defined
+
+- name: Remove unwanted files/folders from new release
+  shell: find {{ deploy_helper.new_release_path }} -name '{{item}}' | xargs rm -rf
+  with_items: "{{ project.project_unwanted_items | default(project_unwanted_items) }}"
+  become: true
+  become_user: "{{ web_user }}"
+  when: deploy_using_git_archive==false
+
 - name: Run git archive to populate new build dir
   shell: git archive {{ project_version }} | tar xf - -C {{ deploy_helper.new_release_path }}
   args:
     chdir: "{{ project_source_path }}"
-  when: project.repo_subtree_path is not defined
+  when: deploy_using_git_archive and project.repo_subtree_path is not defined
 
 - name: Run git archive with subdirectory to populate new build dir
   shell: git archive {{ project_version }} {{ project.repo_subtree_path }} | tar -x --strip-components {{ project.repo_subtree_path.split('/') | count }} -f - -C {{ deploy_helper.new_release_path }}
   args:
     chdir: "{{ project_source_path }}"
-  when: project.repo_subtree_path is defined
+  when: deploy_using_git_archive and project.repo_subtree_path is defined
 
 - name: write unfinished file
   file:

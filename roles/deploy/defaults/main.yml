@@ -45,6 +45,10 @@ project_environment:
 # - default is 'current'
 project_current_path: "{{ project.current_path | default('current') }}"
 
+# If deploy_using_git_archive=false then the folders/files listed in this array
+# will be deleted when deploying the repo to the server
+project_unwanted_items: ['.git']
+
 # Whether to run `wp core update-db` at end of each deploy
 update_db_on_deploy: true
 
