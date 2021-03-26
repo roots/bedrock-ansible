@@ -2,18 +2,18 @@ disable_default_pool: true
 memcached_sessions: false
 
 php_extensions_default:
-  php7.4-cli: "{{ apt_package_state }}"
-  php7.4-common: "{{ apt_package_state }}"
-  php7.4-curl: "{{ apt_package_state }}"
-  php7.4-dev: "{{ apt_package_state }}"
-  php7.4-fpm: "{{ apt_package_state }}"
-  php7.4-gd: "{{ apt_package_state }}"
-  php7.4-mbstring: "{{ apt_package_state }}"
-  php7.4-mysql: "{{ apt_package_state }}"
+  php-cli: "{{ apt_package_state }}"
+  php-common: "{{ apt_package_state }}"
+  php-curl: "{{ apt_package_state }}"
+  php-dev: "{{ apt_package_state }}"
+  php-fpm: "{{ apt_package_state }}"
+  php-gd: "{{ apt_package_state }}"
+  php-mbstring: "{{ apt_package_state }}"
+  php-mysql: "{{ apt_package_state }}"
   php7.4-opcache: "{{ apt_package_state }}"
-  php7.4-xml: "{{ apt_package_state }}"
-  php7.4-xmlrpc: "{{ apt_package_state }}"
-  php7.4-zip: "{{ apt_package_state }}"
+  php-xml: "{{ apt_package_state }}"
+  php-xmlrpc: "{{ apt_package_state }}"
+  php-zip: "{{ apt_package_state }}"
 
 php_extensions_custom: {}
 php_extensions: "{{ php_extensions_default | combine(php_extensions_custom) }}"
